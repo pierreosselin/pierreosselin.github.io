@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Passing a Chicken through an MNIST Model &middot; Pierre Osselin
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="http://localhost:4000/public/css/poole.css">
+  <link rel="stylesheet" href="http://localhost:4000/public/css/syntax.css">
+  <link rel="stylesheet" href="http://localhost:4000/public/css/hyde.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://localhost:4000/public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="http://localhost:4000/public/favicon.ico">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body>
+
+    <div class="sidebar">
+  <div class="container sidebar-sticky">
+    <!-- Comment to remove picture -->
+    <img src="http://localhost:4000/imgs/profile.jpg" style="align:center; width:150px; height:150px; margin: 0 auto; border-radius: 50%;">
+    <div class="sidebar-about">
+      <h2> <!-- This was originally h1, but made font smaller with h2 -->
+        <a href="http://localhost:4000">
+          Pierre Osselin
+        </a>
+      </h2>
+      <a href="https://github.com/PierreOsselin">
+        <i class="fa fa-github"></i>
+      </a> &nbsp;
+      <a href="https://linkedin.com/in/EmilienDupont">
+        <i class="fa fa-linkedin"></i>
+      </a> &nbsp;
+      <a href="https://twitter.com/emidup">
+        <i class="fa fa-twitter"></i>
+      </a>
+      <p class="lead">Machine Learning</p>
+
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item" href="/">Home</a>
+
+      
+
+      
+      
+        
+          
+        
+      
+        
+          
+            <a class="sidebar-nav-item" href="/about/">About</a>
+          
+        
+      
+        
+      
+        
+          
+        
+      
+        
+          
+            <a class="sidebar-nav-item" href="/visualizations/">Visualizations</a>
+          
+        
+      
+      <a class="sidebar-nav-item" href="https://github.com/pierreosselin/pierreosselin.github.io/raw/master/CVPierreResearch.pdf">Resume</a>
+      <!-- <a class="sidebar-nav-item" href="https://bl.ocks.org/EmilienDupont">d3 Blocks</a> -->
+    </nav>
+  </div>
+</div>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-109900176-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-109900176-1');
+</script>
+
+
+    <div class="content container">
+      <div class="post">
+  <h1 class="post-title">Passing a Chicken through an MNIST Model</h1>
+  <span class="post-date">14 Mar 2018</span>
+  <p>When you put a picture of a chicken through a model trained on <a href="https://en.wikipedia.org/wiki/MNIST_database">MNIST</a>, the model is 99.9% confident that the chicken is a 5. That’s not good.</p>
+
+<p>This problem does not just relate to chickens and digits but the fact that a neural net makes very confident predictions on data that does not come from the same distribution as the training data. While this example is artificial, it is common in practice for a machine learning model to be used on data that is very different from the data it was trained on. A self-driving car, for example, may encounter an unusual environment that was never seen during training. In such cases, the system should not be overly confident but instead let the driver know that it is not able to make a meaningful prediction.<sup><a href="#myfootnote1">1</a></sup></p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/mnist-grid-with-chicken.png" style="align:center; margin: 0 auto; width:80%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">Images from MNIST and a chicken.</p>
+
+<h2 id="discriminative-models-and-unseen-data">Discriminative models and unseen data</h2>
+
+<p>When doing classification we are often interested in building a discriminative model <script type="math/tex">p(y \vert x)</script>, i.e. a model of the probability of a certain label <script type="math/tex">y</script> (e.g. digit type) given a datapoint <script type="math/tex">x</script> (e.g. an image of a digit). If we use data drawn from a distribution <script type="math/tex">p_{\text{train}}(x)</script> to train a discriminative model <script type="math/tex">p(y \vert x)</script>, how will the trained model behave when we input an <script type="math/tex">x</script> that is very far from <script type="math/tex">p_{\text{train}}(x)</script>? For example, if we train a model to predict digit type from an image of a digit, what happens when we put a picture of a chicken through this model?</p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/digits-chicken-prob-map.png" style="align:center; margin: 0 auto; width:100%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">In the space of images, chickens lie far away from digits. This figure shows the distribution of digits in blue (corresponding to the training distribution in our case) and where an image of a chicken would lie relative to this.</p>
+
+<h2 id="chicken-probabilities-under-an-mnist-model">Chicken probabilities under an MNIST model</h2>
+
+<p>To explore these problems, we train a simple convolutional neural network (CNN) on MNIST which gets about 98% testing accuracy. We would then like to see what happens to the output probabilities <script type="math/tex">p(y \vert x)</script> of the trained model when shown images that are completely different from digits. As an example, we pass an “MNIST-ified” chicken through the model.<sup><a href="#myfootnote2">2</a></sup></p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/mnistify-chicken.png" style="align:center; margin: 0 auto; width:100%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">An MNIST-ified chicken. The CNN takes in 32 by 32 grayscale images, so we transform the image of the chicken to match this.</p>
+
+<p>Ideally, the outputs <script type="math/tex">p(y \vert x)</script> would be approximately uniform, i.e. the probability of every class would be about 10%. This would mean that the CNN has little confidence that the chicken belongs to any of the 10 classes. However, for the above picture of a chicken, the probability of the label 5 is <strong>99.9%</strong>.</p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/expected-vs-actual-softmax.png" style="align:center; margin: 0 auto; width:60%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">Histograms of expected vs actual softmax class probabilities for an image of a chicken on an MNIST model.</p>
+
+<p>The model is extremely confident that this chicken is the digit 5 even though, to a human, it clearly isn’t. Even worse, it is much more confident that this chicken is a 5 than many other digits that are actually a 5.</p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/five-and-chicken-conf.png" style="align:center; margin: 0 auto; width:50%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">The model is more confident that the image on the right is a 5 than the image on the left.</p>
+
+<h2 id="fashion-probabilities-under-an-mnist-model">Fashion probabilities under an MNIST model</h2>
+
+<p>Of course, it could be that this image of a chicken is just a fluke and high confidence predictions for data outside of <script type="math/tex">p_{\text{train}}(x)</script> are rare. To test this, we use the <a href="https://github.com/zalandoresearch/fashion-mnist">FashionMNIST</a> dataset which contains images of various types clothing.</p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/mnist-and-fashion-examples.png" style="align:center; margin: 0 auto; width:60%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">MNIST and FashionMNIST examples. The images are the same size and both contain 10 classes.</p>
+
+<p>These images have nothing to do with digits, so again we would hope that the model will only make low confidence predictions. We predict <script type="math/tex">p(y \vert x)</script> for 10000 images from the Fashion MNIST dataset using the trained MNIST model and measure the fraction of them which have a high confidence prediction (i.e. where the maximum probability of a certain class <script type="math/tex">\max_y p(y \vert x)</script> is very high). The results are shown below:</p>
+
+<ul>
+  <li><strong>63.4%</strong> of examples have more than <strong>99%</strong> confidence</li>
+  <li><strong>74.3%</strong> of examples have more than <strong>95%</strong> confidence</li>
+  <li><strong>88.9%</strong> of examples have more than <strong>75%</strong> confidence</li>
+</ul>
+
+<p>Almost two thirds of the Fashion MNIST dataset is classified as a certain digit type with more than 99% confidence. This shows that neural nets can consistently make confident predictions about unseen data and that using the output probabilities as a measure of confidence does not make much sense, at least on data that is very far from the training data.</p>
+
+<p>We can also look at how confident<sup><a href="#myfootnote3">3</a></sup> predictions on the fashion items are compared to those on correctly classified digits. To do this, we draw a vertical pink line for every FashionMNIST image and a blue line for every MNIST image. We then sort the lines by the confidence of the prediction on the corresponding image. Ideally, the resulting plot would be all pink on the left and all blue on the right (i.e all MNIST examples have higher confidence than the FashionMNIST examples under an MNIST model). The actual results are shown below.</p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/cnn-confidence.png" style="align:center; margin: 0 auto; width:100%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">Images sorted by confidence. The x-axis corresponds to increasing confidence and each vertical line to an image.</p>
+
+<p>Ideally, all FashionMNIST images would have lower confidence and so be on the left, but this is not the case.</p>
+
+<h2 id="natural-adversarial-examples">Natural adversarial examples</h2>
+
+<p>The chicken and fashion images can loosely be thought of as “natural” adversarial examples. <a href="https://arxiv.org/pdf/1312.6199.pdf">Adversarial examples</a> are typically images from a certain class (e.g. 5) that have been imperceptibly modified to be misclassified as another class (e.g. 7) with high confidence. In the same way that adversarial examples fool the machine learning model, the chicken and fashion images “fool” the model into classifying these images into a certain class with high confidence even though they do not belong to that class (or any of the classes in our case). Machine Learning systems should not only be protected from attackers that maliciously modify images but also from naturally occurring images that are far from the training distribution.</p>
+
+<h2 id="modeling-the-data-px">Modeling the data p(x)</h2>
+
+<p>It seems clear that we can’t solely rely on modeling <script type="math/tex">p(y \vert x)</script> when data far from <script type="math/tex">p_{\text{train}}(x)</script> may be used at test time. In the real world, it is often very difficult to constrain the user only to use data drawn from <script type="math/tex">p_{\text{train}}(x)</script>.</p>
+
+<p>One way to solve this problem is to not only model <script type="math/tex">p(y \vert x)</script> but to also model <script type="math/tex">p_{\text{train}}(x)</script>. If we can model <script type="math/tex">p_{\text{train}}(x)</script> and we get a new sample <script type="math/tex">x_{\text{test}}</script>, we can first check whether this sample is probable under <script type="math/tex">p_{\text{train}}(x)</script>. If it is, we have seen something similar before so we should go ahead and predict <script type="math/tex">p(y \vert x)</script>, otherwise we can reject this sample.</p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/algorithm.png" style="align:center; margin: 0 auto; width:40%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">Simple algorithm for returning meaningful predictions.</p>
+
+<p>There are several ways of modeling p(x). In this post, we will focus on <a href="https://arxiv.org/abs/1312.6114">variational autoencoders</a> (VAE) which have been quite successful at modeling distributions of images.</p>
+
+<h2 id="variational-autoencoders-to-model-px">Variational Autoencoders to model p(x)</h2>
+
+<p>VAEs are <a href="https://en.wikipedia.org/wiki/Generative_model">generative models</a> that learn a joint model <script type="math/tex">p(x, z)</script> of the data <script type="math/tex">x</script> and some <a href="https://en.wikipedia.org/wiki/Latent_variable">latent variables</a> <script type="math/tex">z</script>. As the name suggests, VAEs are closely related to <a href="https://en.wikipedia.org/wiki/Autoencoder">autoencoders</a>. VAEs work by encoding a datapoint <script type="math/tex">x</script> into a distribution <script type="math/tex">q(z \vert x)</script> of latent variables and then sampling a latent vector <script type="math/tex">z</script> from this distribution. The sample <script type="math/tex">z</script> is then decoded into a reconstruction of the encoded data <script type="math/tex">x</script>. The encoder and decoder are typically neural networks.</p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/vae.png" style="align:center; margin: 0 auto; width:40%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">Sketch of VAE architecture, sampling is shown with dashed lines.</p>
+
+<p>Interestingly, VAEs optimize a lower bound on <script type="math/tex">\log p(x)</script> called the <a href="https://arxiv.org/pdf/1601.00670.pdf">Evidence Lower Bound</a> (ELBO).</p>
+
+<script type="math/tex; mode=display">\log p(x) >= \text{ELBO} = - \text{VAE loss}</script>
+
+<p>So after training a VAE on data from <script type="math/tex">p_{\text{train}}</script>, we can calculate the loss on a new example <script type="math/tex">x_{\text{test}}</script> and obtain a lower bound on the log likelihood of that example under <script type="math/tex">p_{\text{train}}</script>. Of course, this is a lower bound, but the hope is that for a well trained model, this lower bound is fairly tight.</p>
+
+<h2 id="reconstruction-of-a-digit-and-a-chicken">Reconstruction of a digit and a chicken</h2>
+
+<p>To test this, we train a convolutional VAE on MNIST. Note that the ELBO is the sum of a <a href="https://arxiv.org/abs/1606.05908">reconstruction error term and a KL divergence</a> term. So if an image is poorly reconstructed by the VAE, it will typically have low probability. The figure below shows reconstructions from the trained VAE.</p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/reconstructed-chicken.png" style="align:center; margin: 0 auto; width:50%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">A digit and a chicken reconstructed by a VAE trained on MNIST. As can be seen the digit is well reconstructed while the chicken is not. This suggests the chicken has low probability under the training distribution.</p>
+
+<p>We can now use the VAE to predict the probability of 10000 FashionMNIST images and 10000 MNIST images under <script type="math/tex">p_{\text{train}}</script>. Ideally, the probabilities of FashionMNIST examples would be considerably lower than all the MNIST examples and we would get a good separation between the two. The figure below shows the results, with sorted probabilities from lowest to highest.</p>
+
+<p><img src="http://localhost:4000/imgs/mnist-chicken/vae-confidence.png" style="align:center; margin: 0 auto; width:100%;" /></p>
+<p style="text-align: center; font-style: italic; font-size: 80%;">FashionMNIST and MNIST examples sorted by probabilities from a VAE model.</p>
+
+<p>As can be seen the separation is much cleaner than when using the maximum class probabilities <script type="math/tex">p(y \vert x)</script>. This shows that modeling <script type="math/tex">p(x)</script> can be useful for classification tasks when data different from the training data may be used at test time.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In this post we used the toy example of chickens and digits to show that a deep learning model can make confident, but meaningless, predictions on data it has never seen. Not only does a chicken get confidently classified as a 5 by an MNIST model, other natural images such as fashion items consistently fool the classifier into making high confidence predictions. We showed that modeling <script type="math/tex">p(x)</script> with a VAE is a simple solution that can partially mitigate this problem. However, solving this problem and, more generally, modeling <a href="http://mlg.eng.cam.ac.uk/yarin/thesis/thesis.pdf">uncertainty in deep learning</a> is an important area of research.</p>
+
+<h4 id="footnotes">Footnotes</h4>
+<p><a name="footnote1">1</a>. The idea of putting a picture of a chicken through an MNIST model initially came from a question I heard on the <a href="http://approximateinference.org/">Approximate Inference</a> panel at NIPS 2017</p>
+
+<p><a name="footnote2">2</a>. I always resize MNIST from 28 by 28 to 32 by 32 because powers of 2 are nice</p>
+
+<p><a name="footnote3">3</a>. The word confidence is used loosely here and is not related to confidence in the <a href="https://en.wikipedia.org/wiki/Confidence_interval">statistical sense</a>. However <script type="math/tex">\max_y p(y \vert x)</script> is commonly used to show that a model is “confident” about its predictions and this is how we use it here</p>
+
+</div>
+
+<!-- mathjax (to render equations) -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/2018/01/24/optimization-visualization/">
+            Interactive Visualization of Optimization Algorithms in Deep Learning
+            <small>24 Jan 2018</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2012/02/06/whats-jekyll/">
+            What's Jekyll?
+            <small>06 Feb 2012</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div>
+
+<div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+/*
+var disqus_config = function () {
+this.page.url = 'http://localhost:4000/2018/03/14/mnist-chicken/';  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = '/2018/03/14/mnist-chicken/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+*/
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://emiliendupont.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+    </div>
+
+  </body>
+</html>

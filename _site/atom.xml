@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+ <title>Pierre Osselin</title>
+ <link href="http://localhost:4000/atom.xml" rel="self"/>
+ <link href="http://localhost:4000/"/>
+ <updated>2019-08-05T01:00:24+02:00</updated>
+ <id>http://localhost:4000</id>
+ <author>
+   <name></name>
+   <email></email>
+ </author>
+
+ 
+ <entry>
+   <title>Passing a Chicken through an MNIST Model</title>
+   <link href="http://localhost:4000/2018/03/14/mnist-chicken/"/>
+   <updated>2018-03-14T00:00:00+01:00</updated>
+   <id>http://localhost:4000/2018/03/14/mnist-chicken</id>
+   <content type="html">&lt;p&gt;When you put a picture of a chicken through a model trained on &lt;a href=&quot;https://en.wikipedia.org/wiki/MNIST_database&quot;&gt;MNIST&lt;/a&gt;, the model is 99.9% confident that the chicken is a 5. That’s not good.&lt;/p&gt;
+
+&lt;p&gt;This problem does not just relate to chickens and digits but the fact that a neural net makes very confident predictions on data that does not come from the same distribution as the training data. While this example is artificial, it is common in practice for a machine learning model to be used on data that is very different from the data it was trained on. A self-driving car, for example, may encounter an unusual environment that was never seen during training. In such cases, the system should not be overly confident but instead let the driver know that it is not able to make a meaningful prediction.&lt;sup&gt;&lt;a href=&quot;#myfootnote1&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/mnist-grid-with-chicken.png&quot; style=&quot;align:center; margin: 0 auto; width:80%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;Images from MNIST and a chicken.&lt;/p&gt;
+
+&lt;h2 id=&quot;discriminative-models-and-unseen-data&quot;&gt;Discriminative models and unseen data&lt;/h2&gt;
+
+&lt;p&gt;When doing classification we are often interested in building a discriminative model &lt;script type=&quot;math/tex&quot;&gt;p(y \vert x)&lt;/script&gt;, i.e. a model of the probability of a certain label &lt;script type=&quot;math/tex&quot;&gt;y&lt;/script&gt; (e.g. digit type) given a datapoint &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; (e.g. an image of a digit). If we use data drawn from a distribution &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}(x)&lt;/script&gt; to train a discriminative model &lt;script type=&quot;math/tex&quot;&gt;p(y \vert x)&lt;/script&gt;, how will the trained model behave when we input an &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; that is very far from &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}(x)&lt;/script&gt;? For example, if we train a model to predict digit type from an image of a digit, what happens when we put a picture of a chicken through this model?&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/digits-chicken-prob-map.png&quot; style=&quot;align:center; margin: 0 auto; width:100%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;In the space of images, chickens lie far away from digits. This figure shows the distribution of digits in blue (corresponding to the training distribution in our case) and where an image of a chicken would lie relative to this.&lt;/p&gt;
+
+&lt;h2 id=&quot;chicken-probabilities-under-an-mnist-model&quot;&gt;Chicken probabilities under an MNIST model&lt;/h2&gt;
+
+&lt;p&gt;To explore these problems, we train a simple convolutional neural network (CNN) on MNIST which gets about 98% testing accuracy. We would then like to see what happens to the output probabilities &lt;script type=&quot;math/tex&quot;&gt;p(y \vert x)&lt;/script&gt; of the trained model when shown images that are completely different from digits. As an example, we pass an “MNIST-ified” chicken through the model.&lt;sup&gt;&lt;a href=&quot;#myfootnote2&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/mnistify-chicken.png&quot; style=&quot;align:center; margin: 0 auto; width:100%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;An MNIST-ified chicken. The CNN takes in 32 by 32 grayscale images, so we transform the image of the chicken to match this.&lt;/p&gt;
+
+&lt;p&gt;Ideally, the outputs &lt;script type=&quot;math/tex&quot;&gt;p(y \vert x)&lt;/script&gt; would be approximately uniform, i.e. the probability of every class would be about 10%. This would mean that the CNN has little confidence that the chicken belongs to any of the 10 classes. However, for the above picture of a chicken, the probability of the label 5 is &lt;strong&gt;99.9%&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/expected-vs-actual-softmax.png&quot; style=&quot;align:center; margin: 0 auto; width:60%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;Histograms of expected vs actual softmax class probabilities for an image of a chicken on an MNIST model.&lt;/p&gt;
+
+&lt;p&gt;The model is extremely confident that this chicken is the digit 5 even though, to a human, it clearly isn’t. Even worse, it is much more confident that this chicken is a 5 than many other digits that are actually a 5.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/five-and-chicken-conf.png&quot; style=&quot;align:center; margin: 0 auto; width:50%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;The model is more confident that the image on the right is a 5 than the image on the left.&lt;/p&gt;
+
+&lt;h2 id=&quot;fashion-probabilities-under-an-mnist-model&quot;&gt;Fashion probabilities under an MNIST model&lt;/h2&gt;
+
+&lt;p&gt;Of course, it could be that this image of a chicken is just a fluke and high confidence predictions for data outside of &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}(x)&lt;/script&gt; are rare. To test this, we use the &lt;a href=&quot;https://github.com/zalandoresearch/fashion-mnist&quot;&gt;FashionMNIST&lt;/a&gt; dataset which contains images of various types clothing.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/mnist-and-fashion-examples.png&quot; style=&quot;align:center; margin: 0 auto; width:60%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;MNIST and FashionMNIST examples. The images are the same size and both contain 10 classes.&lt;/p&gt;
+
+&lt;p&gt;These images have nothing to do with digits, so again we would hope that the model will only make low confidence predictions. We predict &lt;script type=&quot;math/tex&quot;&gt;p(y \vert x)&lt;/script&gt; for 10000 images from the Fashion MNIST dataset using the trained MNIST model and measure the fraction of them which have a high confidence prediction (i.e. where the maximum probability of a certain class &lt;script type=&quot;math/tex&quot;&gt;\max_y p(y \vert x)&lt;/script&gt; is very high). The results are shown below:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;63.4%&lt;/strong&gt; of examples have more than &lt;strong&gt;99%&lt;/strong&gt; confidence&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;74.3%&lt;/strong&gt; of examples have more than &lt;strong&gt;95%&lt;/strong&gt; confidence&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;88.9%&lt;/strong&gt; of examples have more than &lt;strong&gt;75%&lt;/strong&gt; confidence&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Almost two thirds of the Fashion MNIST dataset is classified as a certain digit type with more than 99% confidence. This shows that neural nets can consistently make confident predictions about unseen data and that using the output probabilities as a measure of confidence does not make much sense, at least on data that is very far from the training data.&lt;/p&gt;
+
+&lt;p&gt;We can also look at how confident&lt;sup&gt;&lt;a href=&quot;#myfootnote3&quot;&gt;3&lt;/a&gt;&lt;/sup&gt; predictions on the fashion items are compared to those on correctly classified digits. To do this, we draw a vertical pink line for every FashionMNIST image and a blue line for every MNIST image. We then sort the lines by the confidence of the prediction on the corresponding image. Ideally, the resulting plot would be all pink on the left and all blue on the right (i.e all MNIST examples have higher confidence than the FashionMNIST examples under an MNIST model). The actual results are shown below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/cnn-confidence.png&quot; style=&quot;align:center; margin: 0 auto; width:100%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;Images sorted by confidence. The x-axis corresponds to increasing confidence and each vertical line to an image.&lt;/p&gt;
+
+&lt;p&gt;Ideally, all FashionMNIST images would have lower confidence and so be on the left, but this is not the case.&lt;/p&gt;
+
+&lt;h2 id=&quot;natural-adversarial-examples&quot;&gt;Natural adversarial examples&lt;/h2&gt;
+
+&lt;p&gt;The chicken and fashion images can loosely be thought of as “natural” adversarial examples. &lt;a href=&quot;https://arxiv.org/pdf/1312.6199.pdf&quot;&gt;Adversarial examples&lt;/a&gt; are typically images from a certain class (e.g. 5) that have been imperceptibly modified to be misclassified as another class (e.g. 7) with high confidence. In the same way that adversarial examples fool the machine learning model, the chicken and fashion images “fool” the model into classifying these images into a certain class with high confidence even though they do not belong to that class (or any of the classes in our case). Machine Learning systems should not only be protected from attackers that maliciously modify images but also from naturally occurring images that are far from the training distribution.&lt;/p&gt;
+
+&lt;h2 id=&quot;modeling-the-data-px&quot;&gt;Modeling the data p(x)&lt;/h2&gt;
+
+&lt;p&gt;It seems clear that we can’t solely rely on modeling &lt;script type=&quot;math/tex&quot;&gt;p(y \vert x)&lt;/script&gt; when data far from &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}(x)&lt;/script&gt; may be used at test time. In the real world, it is often very difficult to constrain the user only to use data drawn from &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}(x)&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;One way to solve this problem is to not only model &lt;script type=&quot;math/tex&quot;&gt;p(y \vert x)&lt;/script&gt; but to also model &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}(x)&lt;/script&gt;. If we can model &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}(x)&lt;/script&gt; and we get a new sample &lt;script type=&quot;math/tex&quot;&gt;x_{\text{test}}&lt;/script&gt;, we can first check whether this sample is probable under &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}(x)&lt;/script&gt;. If it is, we have seen something similar before so we should go ahead and predict &lt;script type=&quot;math/tex&quot;&gt;p(y \vert x)&lt;/script&gt;, otherwise we can reject this sample.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/algorithm.png&quot; style=&quot;align:center; margin: 0 auto; width:40%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;Simple algorithm for returning meaningful predictions.&lt;/p&gt;
+
+&lt;p&gt;There are several ways of modeling p(x). In this post, we will focus on &lt;a href=&quot;https://arxiv.org/abs/1312.6114&quot;&gt;variational autoencoders&lt;/a&gt; (VAE) which have been quite successful at modeling distributions of images.&lt;/p&gt;
+
+&lt;h2 id=&quot;variational-autoencoders-to-model-px&quot;&gt;Variational Autoencoders to model p(x)&lt;/h2&gt;
+
+&lt;p&gt;VAEs are &lt;a href=&quot;https://en.wikipedia.org/wiki/Generative_model&quot;&gt;generative models&lt;/a&gt; that learn a joint model &lt;script type=&quot;math/tex&quot;&gt;p(x, z)&lt;/script&gt; of the data &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; and some &lt;a href=&quot;https://en.wikipedia.org/wiki/Latent_variable&quot;&gt;latent variables&lt;/a&gt; &lt;script type=&quot;math/tex&quot;&gt;z&lt;/script&gt;. As the name suggests, VAEs are closely related to &lt;a href=&quot;https://en.wikipedia.org/wiki/Autoencoder&quot;&gt;autoencoders&lt;/a&gt;. VAEs work by encoding a datapoint &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; into a distribution &lt;script type=&quot;math/tex&quot;&gt;q(z \vert x)&lt;/script&gt; of latent variables and then sampling a latent vector &lt;script type=&quot;math/tex&quot;&gt;z&lt;/script&gt; from this distribution. The sample &lt;script type=&quot;math/tex&quot;&gt;z&lt;/script&gt; is then decoded into a reconstruction of the encoded data &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt;. The encoder and decoder are typically neural networks.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/vae.png&quot; style=&quot;align:center; margin: 0 auto; width:40%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;Sketch of VAE architecture, sampling is shown with dashed lines.&lt;/p&gt;
+
+&lt;p&gt;Interestingly, VAEs optimize a lower bound on &lt;script type=&quot;math/tex&quot;&gt;\log p(x)&lt;/script&gt; called the &lt;a href=&quot;https://arxiv.org/pdf/1601.00670.pdf&quot;&gt;Evidence Lower Bound&lt;/a&gt; (ELBO).&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\log p(x) &gt;= \text{ELBO} = - \text{VAE loss}&lt;/script&gt;
+
+&lt;p&gt;So after training a VAE on data from &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}&lt;/script&gt;, we can calculate the loss on a new example &lt;script type=&quot;math/tex&quot;&gt;x_{\text{test}}&lt;/script&gt; and obtain a lower bound on the log likelihood of that example under &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}&lt;/script&gt;. Of course, this is a lower bound, but the hope is that for a well trained model, this lower bound is fairly tight.&lt;/p&gt;
+
+&lt;h2 id=&quot;reconstruction-of-a-digit-and-a-chicken&quot;&gt;Reconstruction of a digit and a chicken&lt;/h2&gt;
+
+&lt;p&gt;To test this, we train a convolutional VAE on MNIST. Note that the ELBO is the sum of a &lt;a href=&quot;https://arxiv.org/abs/1606.05908&quot;&gt;reconstruction error term and a KL divergence&lt;/a&gt; term. So if an image is poorly reconstructed by the VAE, it will typically have low probability. The figure below shows reconstructions from the trained VAE.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/reconstructed-chicken.png&quot; style=&quot;align:center; margin: 0 auto; width:50%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;A digit and a chicken reconstructed by a VAE trained on MNIST. As can be seen the digit is well reconstructed while the chicken is not. This suggests the chicken has low probability under the training distribution.&lt;/p&gt;
+
+&lt;p&gt;We can now use the VAE to predict the probability of 10000 FashionMNIST images and 10000 MNIST images under &lt;script type=&quot;math/tex&quot;&gt;p_{\text{train}}&lt;/script&gt;. Ideally, the probabilities of FashionMNIST examples would be considerably lower than all the MNIST examples and we would get a good separation between the two. The figure below shows the results, with sorted probabilities from lowest to highest.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/mnist-chicken/vae-confidence.png&quot; style=&quot;align:center; margin: 0 auto; width:100%;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;FashionMNIST and MNIST examples sorted by probabilities from a VAE model.&lt;/p&gt;
+
+&lt;p&gt;As can be seen the separation is much cleaner than when using the maximum class probabilities &lt;script type=&quot;math/tex&quot;&gt;p(y \vert x)&lt;/script&gt;. This shows that modeling &lt;script type=&quot;math/tex&quot;&gt;p(x)&lt;/script&gt; can be useful for classification tasks when data different from the training data may be used at test time.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;In this post we used the toy example of chickens and digits to show that a deep learning model can make confident, but meaningless, predictions on data it has never seen. Not only does a chicken get confidently classified as a 5 by an MNIST model, other natural images such as fashion items consistently fool the classifier into making high confidence predictions. We showed that modeling &lt;script type=&quot;math/tex&quot;&gt;p(x)&lt;/script&gt; with a VAE is a simple solution that can partially mitigate this problem. However, solving this problem and, more generally, modeling &lt;a href=&quot;http://mlg.eng.cam.ac.uk/yarin/thesis/thesis.pdf&quot;&gt;uncertainty in deep learning&lt;/a&gt; is an important area of research.&lt;/p&gt;
+
+&lt;h4 id=&quot;footnotes&quot;&gt;Footnotes&lt;/h4&gt;
+&lt;p&gt;&lt;a name=&quot;footnote1&quot;&gt;1&lt;/a&gt;. The idea of putting a picture of a chicken through an MNIST model initially came from a question I heard on the &lt;a href=&quot;http://approximateinference.org/&quot;&gt;Approximate Inference&lt;/a&gt; panel at NIPS 2017&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&quot;footnote2&quot;&gt;2&lt;/a&gt;. I always resize MNIST from 28 by 28 to 32 by 32 because powers of 2 are nice&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&quot;footnote3&quot;&gt;3&lt;/a&gt;. The word confidence is used loosely here and is not related to confidence in the &lt;a href=&quot;https://en.wikipedia.org/wiki/Confidence_interval&quot;&gt;statistical sense&lt;/a&gt;. However &lt;script type=&quot;math/tex&quot;&gt;\max_y p(y \vert x)&lt;/script&gt; is commonly used to show that a model is “confident” about its predictions and this is how we use it here&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Interactive Visualization of Optimization Algorithms in Deep Learning</title>
+   <link href="http://localhost:4000/2018/01/24/optimization-visualization/"/>
+   <updated>2018-01-24T00:00:00+01:00</updated>
+   <id>http://localhost:4000/2018/01/24/optimization-visualization</id>
+   <content type="html">&lt;p&gt;Optimization on non convex functions in high dimensional spaces, like those encountered in deep learning, can be hard to visualize. However, we can learn a lot from visualizing optimization paths on simple 2d non convex functions.&lt;/p&gt;
+
+&lt;p style=&quot;text-align: center; font-weight: bold;&quot;&gt;Click anywhere on the function contour to start a minimization.&lt;/p&gt;
+
+&lt;div id=&quot;optim-viz&quot;&gt;
+&lt;/div&gt;
+
+&lt;p&gt;You can toggle the different algorithms by clicking the circles in the lower bar. The code is available &lt;a href=&quot;https://bl.ocks.org/EmilienDupont/aaf429be5705b219aaaf8d691e27ca87&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;observations&quot;&gt;Observations&lt;/h2&gt;
+
+&lt;p&gt;The above function is given by&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;f(x, y) =  x^2 + y^2 - a e^{-\frac{(x - 1)^2 + y^2}{c}} - b e^{-\frac{(x + 1)^2 + y^2}{d}}&lt;/script&gt;
+
+&lt;p&gt;It is basically a quadratic “bowl” with two gaussians creating minima at (1, 0) and (-1, 0) respectively. The size of these minima is controlled by the &lt;script type=&quot;math/tex&quot;&gt;a&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;b&lt;/script&gt; parameters.&lt;/p&gt;
+
+&lt;h3 id=&quot;different-minima&quot;&gt;Different minima&lt;/h3&gt;
+
+&lt;p&gt;Starting from the same point, different algorithms will converge to different minima. Often, SGD and SGD with momentum will converge to the poorer minimum (the one on the right) while RMSProp and Adam will converge to the global minimum. For this particular function, Adam is the algorithm that converges to the global minimum from the most initializations.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/optim_viz_only_adam.png&quot; style=&quot;align:center; margin: 0 auto; width:500px;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;Only Adam (in green) converges to the global minimum.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-effects-of-momentum&quot;&gt;The effects of momentum&lt;/h3&gt;
+
+&lt;p&gt;Augmenting SGD with momentum has &lt;a href=&quot;https://distill.pub/2017/momentum/&quot;&gt;many advantages&lt;/a&gt; and often works better than the other standard algorithms for an appropriately chosen learning rate (check out this &lt;a href=&quot;https://arxiv.org/abs/1705.08292&quot;&gt;paper&lt;/a&gt; for more details). However, with the wrong learning rate, SGD with momentum can overshoot minima and this often leads to a spiraling pattern around the minimum.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/optim_viz_momentum.png&quot; style=&quot;align:center; margin: 0 auto; width:500px;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;SGD with momentum spiraling towards the minimum.&lt;/p&gt;
+
+&lt;h3 id=&quot;standard-sgd-does-not-get-you-far&quot;&gt;Standard SGD does not get you far&lt;/h3&gt;
+
+&lt;p&gt;SGD without momentum consistently performs the worst. The learning rate for SGD on the visualization is set to be artificially high (an order of magnitude higher than the other algorithms) in order for the optimization to converge in a reasonable amount of time.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;classic-optimization-test-functions&quot;&gt;Classic optimization test functions&lt;/h2&gt;
+
+&lt;p&gt;There are many famous &lt;a href=&quot;https://en.wikipedia.org/wiki/Test_functions_for_optimization&quot;&gt;test functions&lt;/a&gt; for optimization which are useful for testing convergence, precision, robustness and performance of optimization algorithms. They also exhibit interesting behaviour which does not appear in the above function.&lt;/p&gt;
+
+&lt;h3 id=&quot;rastrigin&quot;&gt;Rastrigin&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The visualization for this function can be found &lt;a href=&quot;https://bl.ocks.org/EmilienDupont/2141380d9332c37b52f8385ca225703f&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;A &lt;a href=&quot;https://en.wikipedia.org/wiki/Rastrigin_function&quot;&gt;Rastrigin function&lt;/a&gt; is a quadratic bowl overlayed with a grid of sine bumps creating a large number of local minima.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/optim_viz_rastrigin.gif&quot; style=&quot;align:center; margin: 0 auto; width:640px;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;SGD with momentum reaches the global optimum while all other algorithms get stuck in the same local minimum.&lt;/p&gt;
+
+&lt;p&gt;In this example, SGD with momentum outperforms all other algorithms using the default parameter settings. The speed built up from the momentum allows it to power through the sine bumps and converge to the global minimum when other algorithms don’t. Of course, this would not necessarily be the case if the sine bumps had been scaled or spaced differently. Indeed, on the first function in this post, Adam performed the best while SGD with momentum performs the best on the Rastrigin function. This shows that there is no single algorithm that will perform the best on all functions, even in simple 2D cases.&lt;/p&gt;
+
+&lt;h3 id=&quot;rosenbrock&quot;&gt;Rosenbrock&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The visualization for this function can be found &lt;a href=&quot;https://bl.ocks.org/EmilienDupont/f97a3902f4f3a98f350500a3a00371db&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://en.wikipedia.org/wiki/Rosenbrock_function&quot;&gt;Rosenbrock function&lt;/a&gt; has a single global minimum inside a parabolic shaped valley. Most algorithms rapidly converge to this valley, but it is typically difficult to converge to the global minimum within this valley.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/imgs/optim_viz_rosenbrock.gif&quot; style=&quot;align:center; margin: 0 auto; width:640px;&quot; /&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center; font-style: italic; font-size: 80%;&quot;&gt;All algorithms find the global minimum but through very different paths&lt;/p&gt;
+
+&lt;p&gt;While all algorithms converge to the optimum, the adaptive and non adaptive optimization algorithms approach the minimum through different paths. In higher dimensional problems, like in deep learning, different optimization algorithms will likely explore very different areas of parameter space.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Optimization algorithms can exhibit interesting behaviour, even on simple 2d functions. Of course, there are also many phenomena which we cannot hope to visualize on simple 2d problems. &lt;a href=&quot;http://opt-ml.org/&quot;&gt;Understanding&lt;/a&gt; and &lt;a href=&quot;https://arxiv.org/abs/1712.09913&quot;&gt;visualizing&lt;/a&gt; optimization in deep learning in general is an active area of research. New optimization algorithms, like &lt;a href=&quot;https://arxiv.org/abs/1611.01505&quot;&gt;Eve&lt;/a&gt; or &lt;a href=&quot;https://arxiv.org/abs/1706.03471&quot;&gt;YellowFin&lt;/a&gt;, are also being developed. It would be interesting to modify the above code to visualize these more recent algorithms, although it is unclear whether they would differ significantly from momentum SGD on these toy problems.&lt;/p&gt;
+
+&lt;style&gt;
+.sgd {
+    stroke: black;
+}
+
+.momentum {
+    stroke: blue;
+}
+
+.rmsprop {
+    stroke: red;
+}
+
+.adam {
+    stroke: green;
+}
+
+.SGD {
+    fill: black;
+}
+
+.Momentum {
+    fill: blue;
+}
+
+.RMSProp {
+    fill: red;
+}
+
+.Adam {
+    fill: green;
+}
+
+circle:hover {
+  fill-opacity: .3;
+}
+&lt;/style&gt;
+
+&lt;script src=&quot;https://d3js.org/d3.v4.min.js&quot;&gt;&lt;/script&gt;
+
+&lt;script src=&quot;https://d3js.org/d3-contour.v1.min.js&quot;&gt;&lt;/script&gt;
+
+&lt;script src=&quot;https://d3js.org/d3-scale-chromatic.v1.min.js&quot;&gt;&lt;/script&gt;
+
+&lt;script&gt;
+
+var width = 720,
+    height = 500,
+    nx = parseInt(width / 5), // grid sizes
+    ny = parseInt(height / 5),
+    h = 1e-7, // step used when approximating gradients
+    drawing_time = 30; // max time to run optimization
+
+var svg = d3.select(&quot;#optim-viz&quot;)
+            .append(&quot;svg&quot;)
+            .attr(&quot;width&quot;, width)
+            .attr(&quot;height&quot;, height);
+
+// Parameters describing where function is defined
+var domain_x = [-2, 2],
+    domain_y = [-2, 2],
+    domain_f = [-2, 8],
+    contour_step = 0.5; // Step size of contour plot
+
+var scale_x = d3.scaleLinear()
+                .domain([0, width])
+                .range(domain_x);
+
+var scale_y = d3.scaleLinear()
+                .domain([0, height])
+                .range(domain_y);
+
+var thresholds = d3.range(domain_f[0], domain_f[1], contour_step);
+
+var color_scale = d3.scaleLinear()
+    .domain(d3.extent(thresholds))
+    .interpolate(function() { return d3.interpolateYlGnBu; });
+
+var function_g = svg.append(&quot;g&quot;).on(&quot;mousedown&quot;, mousedown),
+    gradient_path_g = svg.append(&quot;g&quot;),
+    menu_g = svg.append(&quot;g&quot;);
+
+// Set up the function and gradients
+
+// Value of f at (x, y)
+function f(x, y) {
+    return -2 * Math.exp(-((x - 1) * (x - 1) + y * y) / .2) + -3 * Math.exp(-((x + 1) * (x + 1) + y * y) / .2) + x * x + y * y;
+}
+
+// Returns gradient of f at (x, y)
+function grad_f(x,y) {
+    var grad_x = (f(x + h, y) - f(x, y)) / h
+        grad_y = (f(x, y + h) - f(x, y)) / h
+    return [grad_x, grad_y];
+}
+
+
+// Returns values of f(x,y) at each point on grid as 1 dim array.
+function get_f_values(nx, ny) {
+    var grid = new Array(nx * ny);
+    for (i = 0; i &lt; nx; i++) {
+        for (j = 0; j &lt; ny; j++) {
+            var x = scale_x( parseFloat(i) / nx * width ),
+                y = scale_y( parseFloat(j) / ny * height );
+            // Set value at ordering expected by d3.contour
+            grid[i + j * nx] = f(x, y);
+        }
+    }
+    return grid;
+}
+
+// Set up the contour plot
+
+var contours = d3.contours()
+    .size([nx, ny])
+    .thresholds(thresholds);
+
+var f_values = get_f_values(nx, ny);
+
+function_g.selectAll(&quot;path&quot;)
+          .data(contours(f_values))
+          .enter().append(&quot;path&quot;)
+          .attr(&quot;d&quot;, d3.geoPath(d3.geoIdentity().scale(width / nx)))
+          .attr(&quot;fill&quot;, function(d) { return color_scale(d.value); })
+          .attr(&quot;stroke&quot;, &quot;none&quot;);
+
+// Set up buttons
+
+var draw_bool = {&quot;SGD&quot; : true, &quot;Momentum&quot; : true, &quot;RMSProp&quot; : true, &quot;Adam&quot; : true};
+
+var buttons = [&quot;SGD&quot;, &quot;Momentum&quot;, &quot;RMSProp&quot;, &quot;Adam&quot;];
+
+menu_g.append(&quot;rect&quot;)
+      .attr(&quot;x&quot;, 0)
+      .attr(&quot;y&quot;, height - 40)
+      .attr(&quot;width&quot;, width)
+      .attr(&quot;height&quot;, 40)
+      .attr(&quot;fill&quot;, &quot;white&quot;)
+      .attr(&quot;opacity&quot;, 0.2);
+
+menu_g.selectAll(&quot;circle&quot;)
+      .data(buttons)
+      .enter()
+      .append(&quot;circle&quot;)
+      .attr(&quot;cx&quot;, function(d,i) { return width/4 * (i + 0.25);} )
+      .attr(&quot;cy&quot;, height - 20)
+      .attr(&quot;r&quot;, 10)
+      .attr(&quot;stroke-width&quot;, 0.5)
+      .attr(&quot;stroke&quot;, &quot;black&quot;)
+      .attr(&quot;class&quot;, function(d) { console.log(d); return d;})
+      .attr(&quot;fill-opacity&quot;, 0.5)
+      .attr(&quot;stroke-opacity&quot;, 1)
+      .on(&quot;mousedown&quot;, button_press);
+
+menu_g.selectAll(&quot;text&quot;)
+      .data(buttons)
+      .enter()
+      .append(&quot;text&quot;)
+      .attr(&quot;x&quot;, function(d,i) { return width/4 * (i + 0.25) + 18;} )
+      .attr(&quot;y&quot;, height - 14)
+      .text(function(d) { return d; })
+      .attr(&quot;text-anchor&quot;, &quot;start&quot;)
+      .attr(&quot;font-family&quot;, &quot;Helvetica Neue&quot;)
+      .attr(&quot;font-size&quot;, 15)
+      .attr(&quot;font-weight&quot;, 200)
+      .attr(&quot;fill&quot;, &quot;white&quot;)
+      .attr(&quot;fill-opacity&quot;, 0.8);
+
+function button_press() {
+    var type = d3.select(this).attr(&quot;class&quot;)
+    if (draw_bool[type]) {
+        d3.select(this).attr(&quot;fill-opacity&quot;, 0);
+        draw_bool[type] = false;
+    } else {
+        d3.select(this).attr(&quot;fill-opacity&quot;, 0.5)
+        draw_bool[type] = true;
+    }
+}
+
+// Set up optimization/gradient descent functions.
+// SGD, Momentum, RMSProp, Adam.
+
+function get_sgd_path(x0, y0, learning_rate, num_steps) {
+    var sgd_history = [{&quot;x&quot;: scale_x.invert(x0), &quot;y&quot;: scale_y.invert(y0)}];
+    var x1, y1, gradient;
+    for (i = 0; i &lt; num_steps; i++) {
+        gradient = grad_f(x0, y0);
+        x1 = x0 - learning_rate * gradient[0]
+        y1 = y0 - learning_rate * gradient[1]
+        sgd_history.push({&quot;x&quot; : scale_x.invert(x1), &quot;y&quot; : scale_y.invert(y1)})
+        x0 = x1
+        y0 = y1
+    }
+    return sgd_history;
+}
+
+function get_momentum_path(x0, y0, learning_rate, num_steps, momentum) {
+    var v_x = 0,
+        v_y = 0;
+    var momentum_history = [{&quot;x&quot;: scale_x.invert(x0), &quot;y&quot;: scale_y.invert(y0)}];
+    var x1, y1, gradient;
+    for (i=0; i &lt; num_steps; i++) {
+        gradient = grad_f(x0, y0)
+        v_x = momentum * v_x - learning_rate * gradient[0]
+        v_y = momentum * v_y - learning_rate * gradient[1]
+        x1 = x0 + v_x
+        y1 = y0 + v_y
+        momentum_history.push({&quot;x&quot; : scale_x.invert(x1), &quot;y&quot; : scale_y.invert(y1)})
+        x0 = x1
+        y0 = y1
+    }
+    return momentum_history
+}
+
+function get_rmsprop_path(x0, y0, learning_rate, num_steps, decay_rate, eps) {
+    var cache_x = 0,
+        cache_y = 0;
+    var rmsprop_history = [{&quot;x&quot;: scale_x.invert(x0), &quot;y&quot;: scale_y.invert(y0)}];
+    var x1, y1, gradient;
+    for (i = 0; i &lt; num_steps; i++) {
+        gradient = grad_f(x0, y0)
+        cache_x = decay_rate * cache_x + (1 - decay_rate) * gradient[0] * gradient[0]
+        cache_y = decay_rate * cache_y + (1 - decay_rate) * gradient[1] * gradient[1]
+        x1 = x0 - learning_rate * gradient[0] / (Math.sqrt(cache_x) + eps)
+        y1 = y0 - learning_rate * gradient[1] / (Math.sqrt(cache_y) + eps)
+        rmsprop_history.push({&quot;x&quot; : scale_x.invert(x1), &quot;y&quot; : scale_y.invert(y1)})
+        x0 = x1
+        y0 = y1
+    }
+    return rmsprop_history;
+}
+
+function get_adam_path(x0, y0, learning_rate, num_steps, beta_1, beta_2, eps) {
+    var m_x = 0,
+        m_y = 0,
+        v_x = 0,
+        v_y = 0;
+    var adam_history = [{&quot;x&quot;: scale_x.invert(x0), &quot;y&quot;: scale_y.invert(y0)}];
+    var x1, y1, gradient;
+    for (i = 0; i &lt; num_steps; i++) {
+        gradient = grad_f(x0, y0)
+        m_x = beta_1 * m_x + (1 - beta_1) * gradient[0]
+        m_y = beta_1 * m_y + (1 - beta_1) * gradient[1]
+        v_x = beta_2 * v_x + (1 - beta_2) * gradient[0] * gradient[0]
+        v_y = beta_2 * v_y + (1 - beta_2) * gradient[1] * gradient[1]
+        x1 = x0 - learning_rate * m_x / (Math.sqrt(v_x) + eps)
+        y1 = y0 - learning_rate * m_y / (Math.sqrt(v_y) + eps)
+        adam_history.push({&quot;x&quot; : scale_x.invert(x1), &quot;y&quot; : scale_y.invert(y1)})
+        x0 = x1
+        y0 = y1
+    }
+    return adam_history;
+}
+
+// Functions necessary for path visualizations
+
+var line_function = d3.line()
+                      .x(function(d) { return d.x; })
+                      .y(function(d) { return d.y; });
+
+function draw_path(path_data, type) {
+    var gradient_path = gradient_path_g.selectAll(type)
+                        .data(path_data)
+                        .enter()
+                        .append(&quot;path&quot;)
+                        .attr(&quot;d&quot;, line_function(path_data.slice(0,1)))
+                        .attr(&quot;class&quot;, type)
+                        .attr(&quot;stroke-width&quot;, 3)
+                        .attr(&quot;fill&quot;, &quot;none&quot;)
+                        .attr(&quot;stroke-opacity&quot;, 0.5)
+                        .transition()
+                        .duration(drawing_time)
+                        .delay(function(d,i) { return drawing_time * i; })
+                        .attr(&quot;d&quot;, function(d,i) { return line_function(path_data.slice(0,i+1));})
+                        .remove();
+
+    gradient_path_g.append(&quot;path&quot;)
+                   .attr(&quot;d&quot;, line_function(path_data))
+                   .attr(&quot;class&quot;, type)
+                   .attr(&quot;stroke-width&quot;, 3)
+                   .attr(&quot;fill&quot;, &quot;none&quot;)
+                   .attr(&quot;stroke-opacity&quot;, 0.5)
+                   .attr(&quot;stroke-opacity&quot;, 0)
+                   .transition()
+                   .duration(path_data.length * drawing_time)
+                   .attr(&quot;stroke-opacity&quot;, 0.5);
+}
+
+// Start minimization from click on contour map
+
+function mousedown() {
+    // Get initial point
+    var point = d3.mouse(this);
+    // Minimize and draw paths
+    minimize(scale_x(point[0]), scale_y(point[1]));
+}
+
+function minimize(x0,y0) {
+    gradient_path_g.selectAll(&quot;path&quot;).remove();
+
+    if (draw_bool.SGD) {
+        var sgd_data = get_sgd_path(x0, y0, 2e-2, 500);
+        draw_path(sgd_data, &quot;sgd&quot;);
+    }
+    if (draw_bool.Momentum) {
+        var momentum_data = get_momentum_path(x0, y0, 1e-2, 200, 0.8);
+        draw_path(momentum_data, &quot;momentum&quot;);
+    }
+    if (draw_bool.RMSProp) {
+        var rmsprop_data = get_rmsprop_path(x0, y0, 1e-2, 300, 0.99, 1e-6);
+        draw_path(rmsprop_data, &quot;rmsprop&quot;);
+    }
+    if (draw_bool.Adam) {
+        var adam_data = get_adam_path(x0, y0, 1e-2, 100, 0.7, 0.999, 1e-6);
+        draw_path(adam_data, &quot;adam&quot;);
+    }
+}
+
+// Start some minimization before click (to demonstrate how it works)
+// minimize(scale_x(100), scale_y(20));
+&lt;/script&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>What's Jekyll?</title>
+   <link href="http://localhost:4000/2012/02/06/whats-jekyll/"/>
+   <updated>2012-02-06T00:00:00+01:00</updated>
+   <id>http://localhost:4000/2012/02/06/whats-jekyll</id>
+   <content type="html">&lt;p&gt;&lt;a href=&quot;http://jekyllrb.com&quot;&gt;Jekyll&lt;/a&gt; is a static site generator, an open-source tool for creating simple yet powerful websites of all shapes and sizes. From &lt;a href=&quot;https://github.com/mojombo/jekyll/blob/master/README.markdown&quot;&gt;the project’s readme&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Jekyll is a simple, blog aware, static site generator. It takes a template directory […] and spits out a complete, static website suitable for serving with Apache or your favorite web server. This is also the engine behind GitHub Pages, which you can use to host your project’s page or blog right here from GitHub.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;It’s an immensely useful tool and one we encourage you to use here with Hyde.&lt;/p&gt;
+
+&lt;p&gt;Find out more by &lt;a href=&quot;https://github.com/mojombo/jekyll&quot;&gt;visiting the project on GitHub&lt;/a&gt;.&lt;/p&gt;
+</content>
+ </entry>
+ 
+
+</feed>
