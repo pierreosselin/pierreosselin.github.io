@@ -3,28 +3,26 @@ layout: page
 title: About
 ---
 
-<p class="message">
-  Hey there! This page is included as an example. Feel free to customize it for your own use upon downloading. Carry on!
-</p>
 
-In the novel, *The Strange Case of Dr. Jeykll and Mr. Hyde*, Mr. Poole is Dr. Jekyll's virtuous and loyal butler. Similarly, Poole is an upstanding and effective butler that helps you build Jekyll themes. It's made by [@mdo](https://twitter.com/mdo).
+Hello! I'm a PhD student in machine learning at [Oxford](http://www.ox.ac.uk/), supervised by [Yee Whye Teh](http://www.stats.ox.ac.uk/~teh/) and [Arnaud Doucet](https://www.stats.ox.ac.uk/~doucet/) and funded by [Google DeepMind](https://deepmind.com/).
 
-There are currently two themes built on Poole:
+My research interests are mainly in representation learning and generative models. Previously, I've worked on [disentanglement](https://arxiv.org/abs/1804.00104) and [semantic inpainting](https://arxiv.org/abs/1802.03065) and its [applications](https://arxiv.org/abs/1802.03065) to various scientific problems.
 
-* [Hyde](http://hyde.getpoole.com)
-* [Lanyon](http://lanyon.getpoole.com)
+I also enjoy making [visualizations](https://emiliendupont.github.io/visualizations/) of algorithms and concepts in maths.
 
-Learn more and contribute on [GitHub](https://github.com/poole).
+Before starting my PhD, I worked as a machine learning scientist at [STIC](http://www.slb.com/about/rd/technology/stic.aspx). I also studied [computational maths](https://icme.stanford.edu/) at [Stanford University](https://www.stanford.edu/) and theoretical physics at [Imperial College](https://www.imperial.ac.uk/).
 
-## Setup
 
-Some fun facts about the setup of this project include:
+### Contact
+<i class="fa fa-envelope"></i>
+emilien.dupont (at) stats.ox.ac.uk
 
-* Built for [Jekyll](http://jekyllrb.com)
-* Developed on GitHub and hosted for free on [GitHub Pages](https://pages.github.com)
-* Coded with [Sublime Text 2](http://sublimetext.com), an amazing code editor
-* Designed and developed while listening to music like [Blood Bros Trilogy](https://soundcloud.com/maddecent/sets/blood-bros-series)
+<i class="fa fa-linkedin"></i> LinkedIn/[emiliendupont](https://linkedin.com/in/emiliendupont)
 
-Have questions or suggestions? Feel free to [open an issue on GitHub](https://github.com/poole/issues/new) or [ask me on Twitter](https://twitter.com/mdo).
+<i class="fa fa-github"></i> Github/[EmilienDupont](https://github.com/EmilienDupont)
 
-Thanks for reading!
+<i class="fa fa-twitter"></i> Twitter/[emidup](https://twitter.com/emidup)
+
+<img src="{{ site.url }}/imgs/gscholar_icon.png" style="float: left; align: bottom; width:16px;">&nbsp;Google Scholar/[Emilien Dupont](https://scholar.google.com/citations?user=IY5WyIEAAAAJ&hl=en)
+
+<img src="{{ site.url }}/imgs/d3_icon.png" style="float: left; align: bottom; width:16px;">&nbsp;d3 Blocks/[EmilienDupont](https://bl.ocks.org/EmilienDupont)
