@@ -17,11 +17,11 @@ Before starting my PhD, I worked as a machine learning scientist at [STIC](http:
 <i class="fa fa-envelope"></i>
 emilien.dupont (at) stats.ox.ac.uk
 
-<i class="fa fa-linkedin"></i> LinkedIn/[emiliendupont](https://linkedin.com/in/emiliendupont)
+<i class="fa fa-linkedin"></i> LinkedIn/[PierreOsselin](https://linkedin.com/in/pierre-osselin-85176412b)
 
-<i class="fa fa-github"></i> Github/[EmilienDupont](https://github.com/EmilienDupont)
+<i class="fa fa-github"></i> Github/[pierreosselin](https://github.com/pierreosselin)
 
-<i class="fa fa-twitter"></i> Twitter/[emidup](https://twitter.com/emidup)
+<i class="fa fa-twitter"></i> Twitter/[POsselin](https://twitter.com/POsselin)
 
 <img src="{{ site.url }}/imgs/gscholar_icon.png" style="float: left; align: bottom; width:16px;">&nbsp;Google Scholar/[Emilien Dupont](https://scholar.google.com/citations?user=IY5WyIEAAAAJ&hl=en)
 
