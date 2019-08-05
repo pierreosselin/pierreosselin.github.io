@@ -8,8 +8,6 @@ Hello! I'm an Oxford Graduate Student in machine learning at [Oxford](http://www
 
 My research interests are mainly in representation learning and generative models. Previously, I've worked on Statistical learning for hierarchical representation.
 
-I also enjoy making [visualizations](https://emiliendupont.github.io/visualizations/) of algorithms and concepts in maths.
-
 Before starting my degree, I worked as a scientific programmer at [NovaDiscovery](https://www.novadiscovery.com/). I also studied Engineering at [Ecole Centrale Paris](https://www.centralesupelec.fr/) now CentraleSupelec.
 
 
