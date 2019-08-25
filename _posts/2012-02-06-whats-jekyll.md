@@ -9,4 +9,11 @@ title: What's Jekyll?
 
 It's an immensely useful tool and one we encourage you to use here with Hyde.
 
+```python
+def lol(n):
+    print("je suis un dieu")
+    return n*2
+```
+
+
 Find out more by [visiting the project on GitHub](https://github.com/mojombo/jekyll).
