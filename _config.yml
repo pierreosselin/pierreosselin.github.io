@@ -11,6 +11,8 @@ tagline:          Machine Learning
 description:      Machine Learning
 url:              https://pierreosselin.github.io
 baseurl:
+plugins:
+  - jekyll-paginate
 paginate:         5
 name:             Pierre Osselin
 
