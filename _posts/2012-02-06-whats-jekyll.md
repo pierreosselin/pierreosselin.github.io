@@ -10,7 +10,7 @@ title: What's Jekyll?
 It's an immensely useful tool and one we encourage you to use here with Hyde.
 
 ```python
-def lol(n):
+def test(n):
     print("Test")
     return n*2
 ```
