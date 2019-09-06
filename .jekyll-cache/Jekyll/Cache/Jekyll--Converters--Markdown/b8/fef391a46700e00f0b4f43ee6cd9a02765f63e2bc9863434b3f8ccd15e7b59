@@ -1,0 +1,164 @@
+I"�#<h2 id="introduction">Introduction</h2>
+
+<ul>
+  <li>Most of the time, cluster consists in model with fixed number of clusters such as k-means or mixture of Gaussians.</li>
+  <li>Non parametric model, want to grow the number of clusters as the number of data grows, as well as the number of parameters.</li>
+  <li>Proper may to model and infer number of clusters.</li>
+  <li>Complexify the model with the complexity of the data in a automatic manner.</li>
+</ul>
+
+<h2 id="the-dirichlet-process">The Dirichlet process</h2>
+
+<h3 id="formal-definition">Formal Definition</h3>
+
+<p>The Dirichlet process is a stochastic process, whose finite distribution follows the Dirichlet distribution i.e:</p>
+
+<script type="math/tex; mode=display">G \sim DP(\alpha, H)</script>
+
+<script type="math/tex; mode=display">(G(A_{1}), ..., G(A_{n})) \sim Dirichlet(\alpha H(A_{1}), ..., \alpha H(A_{n}))</script>
+
+<p>(Existence through the Extension theorem of Kolmogorov).</p>
+
+<ul>
+  <li>Distribution over distribution.</li>
+  <li>Prior over distribution.</li>
+  <li>Same support with infinitely countable number of elements.</li>
+</ul>
+
+<p><script type="math/tex">\theta_{i} \sim G</script> are i.i.d, however, marginalized over <script type="math/tex">G</script> they are not independant, in particular, we can show that :</p>
+
+<script type="math/tex; mode=display">G | \theta_{1},..., \theta_{n} \sim DP \Bigg( n + \alpha, \frac{\alpha H + \sum\limits_{i = 1}^{n} \delta_{\theta_{i}}}{n + \alpha} \Bigg)</script>
+
+<p>In particular, marginalized over G,</p>
+
+<script type="math/tex; mode=display">\theta_{n+1} | \theta_{1},..., \theta_{n} \sim \frac{\alpha H + \sum\limits_{i = 1}^{n} \delta_{\theta_{i}}}{n + \alpha}</script>
+
+<h3 id="the-chinese-restaurant-process">The Chinese Restaurant process</h3>
+
+<p>We don’t expect all the <script type="math/tex">\theta_{i}</script> to have distinct values, we can thus reinterpret our parameters <script type="math/tex">(\theta_{i})_{i = 1:n}</script> to the parameters <script type="math/tex">\{ (\theta_{i}^{*})_{i = 1:K}, (S_{i})_{i = 1:K}\}</script> where <script type="math/tex">\theta_{i}^{*} \sim H</script> and <script type="math/tex">(S_{1}, ..., S_{K})</script> is a partition of <script type="math/tex">[n]</script>, where <script type="math/tex">S_{k}</script> corresponds to the labels <script type="math/tex">i</script> such that <script type="math/tex">\theta_{i} = \theta_{k}^{*}</script>. From this interpretation, we have:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\theta_{n+1} | \theta_{1},..., \theta_{n} = \left\{
+    \begin{array}{ll}
+        \theta_{k}^{*} & \mbox{with probability } \frac{|S_{k}|}{n + \alpha} \\
+        \theta_{K + 1}^{*} & \mbox{with probability } \frac{\alpha}{n + \alpha}
+    \end{array}
+\right. %]]></script>
+
+<p>This operation is called the “Chinese restaurant process”, where the <script type="math/tex">(\theta_{i})_{i}</script> can be interpreted as clients entering a restaurant, and choosing a table with a probability proportional to the number of clients sitting at this table, and a probability to choose a new table proportional to <script type="math/tex">\alpha</script>.</p>
+
+<p>By following this iterative process we can directly infer the joint probability of the reparametrization:</p>
+
+<p><script type="math/tex">\pi(((\theta_{i}^{*}), S)) = P_{\alpha}(S) \times \prod\limits_{k = 1}^{K} H(\theta_{k}^{*})</script>
+Where <script type="math/tex">P_{\alpha}(S) = \frac{\Gamma(\alpha) \alpha^{K} \prod\limits_{k = 1}^{K}\Gamma(n_{k})}{\Gamma(\alpha + n)}</script></p>
+
+<h3 id="stick-breaking-rule">Stick Breaking Rule</h3>
+
+<p>There exist a way to sample a distribution G from <script type="math/tex">DP(\alpha, H)</script> called “stick breaking rule” that works as follows:</p>
+
+<ul>
+  <li>Sample <script type="math/tex">(w_{i})_{i = 1,...} \sim Beta(1,\alpha)</script></li>
+  <li>Sample <script type="math/tex">(\theta_{i}^{*})_{i = 1,...} \sim H</script></li>
+  <li>Compute <script type="math/tex">\pi_{i}(w) = w_{i}*\prod\limits_{j = 1}^{i - 1}(1 - w_{j})</script></li>
+  <li>Return <script type="math/tex">G = \sum\limits_{i = 1}^{\infty} \pi_{i}(w)\delta_{\theta_{i}^{*}}</script></li>
+</ul>
+
+<figure class="image">
+  <img src="/imgs/plotBreak.png" alt="Exemple of samples from the Dirichlet Process centered on a Gaussian with alpha equal to 1 ,10 and 100." />
+  <figcaption>Exemple of samples from the Dirichlet Process centered on a Gaussian with alpha equal to 1 ,10 and 100.</figcaption>
+</figure>
+
+<h2 id="dirichlet-process-for-mixture">Dirichlet process for Mixture</h2>
+
+<h3 id="finite-mixture">Finite Mixture</h3>
+
+<p>A finite mixture model assumes that the data come from a mixture of a finite number of distributions.</p>
+
+<script type="math/tex; mode=display">\pi \sim Dirichlet(\frac{\alpha}{K}, ...,  \frac{\alpha}{K})</script>
+
+<script type="math/tex; mode=display">c_{n} \sim Multinomial(\pi)</script>
+
+<script type="math/tex; mode=display">\theta_{k}^{*} \sim H</script>
+
+<script type="math/tex; mode=display">y_{n} | c_{n}, (\theta_{k}^{*})_{k = 1...K} \sim f(.|\theta_{c_{n}}^{*})</script>
+
+<h3 id="dirichlet-process-for-mixture-1">Dirichlet Process for Mixture</h3>
+
+<p>It can be showed that the marginal distribution converge in distribution to the marginal distribution arising from the Dirichlet Process for mixture modeling.</p>
+
+<script type="math/tex; mode=display">G \sim DP(\alpha, H)</script>
+
+<script type="math/tex; mode=display">\theta_{i} \sim G</script>
+
+<script type="math/tex; mode=display">y_{i}|\theta_{i} \sim f(.|\theta_{i})</script>
+
+<h2 id="inference">Inference</h2>
+
+<p>In a DP model for mixture, we assume that the data are generated in the following way:</p>
+
+<script type="math/tex; mode=display">y_{i} \sim f(y_{i} | \theta_{i})</script>
+
+<p>With the following prior for <script type="math/tex">\theta</script>:</p>
+
+<script type="math/tex; mode=display">\theta \sim G</script>
+
+<script type="math/tex; mode=display">G \sim DP(\alpha, H)</script>
+
+<p>Hence, the Bayes rule translates into, with the representation given above:</p>
+
+<script type="math/tex; mode=display">\pi((\theta^{*}, S) | y) \propto f(y | \theta^{*}, S) P_{\alpha}(S) \prod\limits_{k = 1}^{K}h(\theta^{*}_{k})</script>
+
+<p>Techniques : MCMC + Variational Inference</p>
+
+<h3 id="gibbs-sampling">Gibbs Sampling</h3>
+
+<p>Choosing f and H such that conjugate priors allow us to derive a Gibbs sampler.</p>
+
+<script type="math/tex; mode=display">\pi(\theta_{k}^{*} | \theta_{-k}^{*}, (y_{i})_{i}) \propto h(\theta_{k}^{*}) \times \prod\limits_{i \in S_{k}}f(y_{i}|\theta_{k}^{*})</script>
+
+<script type="math/tex; mode=display">% <![CDATA[
+P(i \in S'^{k} | S^{-i}, y, \theta^{*}_{-i}) = \left\{
+    \begin{array}{ll}
+        \frac{|S_{k}^{-i}|}{n - 1 + \alpha} \times f(y_{i}|\theta^{*}_{k}) & \mbox{for } k = 1,...,K^{-i} \\
+        \frac{\alpha}{n - 1 + \alpha} \times \int f(y_{i}|\theta^{*})dH(\theta^{*}) & \mbox{for } k = K^{-i} + 1
+    \end{array}
+\right. %]]></script>
+
+<p>If a new cluster is created, draw
+<script type="math/tex">\theta^{*} \sim \pi(\theta^{*} | y_{i}) \propto f(y_{i} | \theta^{*})H(\theta^{*})</script></p>
+
+<h3 id="conjugate-priors">Conjugate priors</h3>
+
+<p>with</p>
+
+<script type="math/tex; mode=display">\theta^{*}_{k} = (\boldsymbol{\mu}_{k}^{*}, \boldsymbol{\Sigma}_{k}^{*})</script>
+
+<script type="math/tex; mode=display">y_{i} \sim \mathcal{N}(\boldsymbol{\mu_{k}}^{*}, \boldsymbol{\Sigma}_{k}^{*})</script>
+
+<script type="math/tex; mode=display">(\boldsymbol{\mu_{k}}^{*}, \boldsymbol{\Sigma_{k}}^{*}) \sim NIW(\boldsymbol{\mu}_{0}, \lambda, \boldsymbol{\Psi}, \nu)</script>
+
+<p>In this case we have:
+<script type="math/tex">\theta_{k}^{*} | y \sim NIW(\boldsymbol{\mu}_{n}, \lambda_{n}, \boldsymbol{\Psi}_{n}, \nu_{n})</script></p>
+
+<p>Where</p>
+
+<script type="math/tex; mode=display">\boldsymbol{\mu_{n}} = \frac{\lambda \boldsymbol{\mu}_{0} + n\boldsymbol{\bar{y}}}{\lambda + n}</script>
+
+<script type="math/tex; mode=display">\lambda_{n} = \lambda + n</script>
+
+<script type="math/tex; mode=display">\nu_{n} = \nu + n</script>
+
+<script type="math/tex; mode=display">\boldsymbol{\Psi}_{n} =  \frac{\nu}{\nu + n} \boldsymbol{\Psi} + \boldsymbol{S} + \frac{\lambda n}{\lambda + n} (\boldsymbol{\bar{y}} - \boldsymbol{\mu_{0}})(\boldsymbol{\bar{y}} - \boldsymbol{\mu}_{0})^{T}</script>
+
+<p>With</p>
+
+<script type="math/tex; mode=display">\boldsymbol{S} = \sum\limits_{i = 1}^{n} (\boldsymbol{y}_{i} - \boldsymbol{\bar{y}})(\boldsymbol{y}_{i} - \boldsymbol{\bar{y}})^{T}</script>
+
+<p>The predictive likelihood follows a multivariate student t distribution with <script type="math/tex">(\nu_{n} - d + 1)</script> that we will approximate by moment matching by a gaussian:</p>
+
+<script type="math/tex; mode=display">p(y | \boldsymbol{\mu}_{0}, \lambda, \boldsymbol{\Psi}, \nu) \sim \mathcal{N}(y; \boldsymbol{\mu}_{0}, \frac{(\lambda + 1)\nu}{\lambda(\nu - p - 1)} \boldsymbol{\Psi})</script>
+
+<h2 id="discussion">Discussion</h2>
+
+<p>This model allows to perforw non parametric bayesian inference, however, it shifts the problem to the design of the prior which establish the size a priori of a cluster.</p>
+:ET
