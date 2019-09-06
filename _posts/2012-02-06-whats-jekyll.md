@@ -11,7 +11,7 @@ It's an immensely useful tool and one we encourage you to use here with Hyde.
 
 ```python
 def lol(n):
-    print("je suis un dieu")
+    print("Test")
     return n*2
 ```
 
