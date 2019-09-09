@@ -1,106 +1,4 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-  <head>
-  <link href="http://gmpg.org/xfn/11" rel="profile">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta http-equiv="content-type" content="text/html; charset=utf-8">
-
-  <!-- Enable responsiveness on mobile devices-->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-
-  <title>
-    
-      Dirichlet Process for mixture modeling and Application &middot; Pierre Osselin
-    
-  </title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="http://localhost:4000/public/css/poole.css">
-  <link rel="stylesheet" href="http://localhost:4000/public/css/syntax.css">
-  <link rel="stylesheet" href="http://localhost:4000/public/css/hyde.css">
-  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
-
-  <!-- Icons -->
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://localhost:4000/public/apple-touch-icon-144-precomposed.png">
-                                 <link rel="shortcut icon" href="http://localhost:4000/public/favicon.ico">
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-
-  <!-- RSS -->
-  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
-</head>
-
-
-  <body>
-
-    <div class="sidebar">
-  <div class="container sidebar-sticky">
-    <!-- Comment to remove picture -->
-    <img src="http://localhost:4000/imgs/profile.jpg" style="align:center; width:100px; height:150px; margin: 0 auto; border-radius: 50%;">
-    <div class="sidebar-about">
-      <h2> <!-- This was originally h1, but made font smaller with h2 -->
-        <a href="http://localhost:4000">
-          Pierre Osselin
-        </a>
-      </h2>
-      <a href="https://github.com/PierreOsselin">
-        <i class="fa fa-github"></i>
-      </a> &nbsp;
-      <a href="https://linkedin.com/in/pierre-osselin-85176412b">
-        <i class="fa fa-linkedin"></i>
-      </a> &nbsp;
-      <a href="https://twitter.com/POsselin">
-        <i class="fa fa-twitter"></i>
-      </a>
-      <p class="lead">Machine Learning</p>
-
-    </div>
-
-    <nav class="sidebar-nav">
-      <a class="sidebar-nav-item" href="/">Home</a>
-
-      
-
-      
-      
-        
-          
-        
-      
-        
-          
-            <a class="sidebar-nav-item" href="/about/">About</a>
-          
-        
-      
-        
-      
-        
-          
-        
-      
-      <a class="sidebar-nav-item" href="https://github.com/pierreosselin/pierreosselin.github.io/raw/master/CVPierreResearch.pdf">Resume</a>
-      <!-- <a class="sidebar-nav-item" href="https://bl.ocks.org/EmilienDupont">d3 Blocks</a> -->
-    </nav>
-  </div>
-</div>
-
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-109900176-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-109900176-1');
-</script>
-
-
-    <div class="content container">
-      <div class="post">
-  <h1 class="post-title">Dirichlet Process for mixture modeling and Application</h1>
-  <span class="post-date">25 Aug 2019</span>
-  <h2 id="introduction">Introduction</h2>
+I"‘H<h2 id="introduction">Introduction</h2>
 
 <p>Parametric model suffer over-under fitting and are subject to model selection. The bayesian nonparametric framework offer an alternative with a model complexity that adapts to the number of data in an automatic and scientifically founded manner.</p>
 
@@ -292,7 +190,7 @@ from a multivariate gaussian:</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">objectDP</span> <span class="kn">import</span> <span class="n">DirichletMixtureConjugate</span>
 <span class="n">diri</span> <span class="o">=</span> <span class="n">DirichletMixtureConjugate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-<span class="n">diri</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">epoch</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">vis</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+<span class="n">diri</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">epoch</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">vis</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p><img src="http://localhost:4000/imgs/40.gif" style="align:center; margin: 0 auto; width:500px;" /></p>
@@ -302,10 +200,21 @@ from a multivariate gaussian:</p>
 <p style="text-align: center; font-style: italic; font-size: 80%;">Dirichlet Process with 1600 2D Gaussian points</p>
 
 <p><img src="http://localhost:4000/imgs/4000.gif" style="align:center; margin: 0 auto; width:500px;" /></p>
-<p style="text-align: center; font-style: italic; font-size: 80%;">Dirichlet Process with 4000 2D Gaussian points</p>
-
-<p><img src="http://localhost:4000/imgs/3D.gif" style="align:center; margin: 0 auto; width:500px;" /></p>
 <p style="text-align: center; font-style: italic; font-size: 80%;">Dirichlet Process with 1600 2D Gaussian points</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">data1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="mi">40</span><span class="p">)</span>
+<span class="n">data2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="mi">40</span><span class="p">)</span>
+<span class="n">data3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="mi">40</span><span class="p">)</span>
+<span class="n">data4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="mi">40</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data1</span><span class="p">,</span> <span class="n">data2</span><span class="p">)),</span> <span class="n">data3</span><span class="p">)),</span> <span class="n">data4</span><span class="p">))</span>
+<span class="n">diri</span> <span class="o">=</span> <span class="n">DirichletMixtureConjugate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">K_ini</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">diri</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">epoch</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">vis</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<figure class="image">
+  <img src="/imgs/3Dcrop.png" alt="Dirichlet process applied to four 3D dimensional Gaussians" />
+  <figcaption>Dirichlet process applied to four 3D dimensional Gaussians</figcaption>
+</figure>
 
 <p>We can see that in these cases the state of the sampler quickly attain the expected states and stay in them consistently.</p>
 
@@ -318,51 +227,4 @@ from a multivariate gaussian:</p>
 <p>How does it sustain dimensions?</p>
 
 <p>Hierarchical Dirichlet Process?</p>
-
-</div>
-
-<!-- mathjax (to render equations) -->
-<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-<div class="related">
-  <h2>Related Posts</h2>
-  <ul class="related-posts">
-    
-      <li>
-        <h3>
-          <a href="/2019/08/25/Networks/">
-            Efficient community detection in sparse networks with non-backtracking random walkers
-            <small>25 Aug 2019</small>
-          </a>
-        </h3>
-      </li>
-    
-  </ul>
-</div>
-
-<div id="disqus_thread"></div>
-<script>
-
-/**
-*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
-/*
-var disqus_config = function () {
-this.page.url = 'http://localhost:4000/2019/08/25/Dirichlet-Process-For-Mixture/';  // Replace PAGE_URL with your page's canonical URL variable
-this.page.identifier = '/2019/08/25/Dirichlet-Process-For-Mixture/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-};
-*/
-(function() { // DON'T EDIT BELOW THIS LINE
-var d = document, s = d.createElement('script');
-s.src = 'https://pierreosselin.disqus.com/embed.js';
-s.setAttribute('data-timestamp', +new Date());
-(d.head || d.body).appendChild(s);
-})();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-
-
-    </div>
-
-  </body>
-</html>
+:ET
