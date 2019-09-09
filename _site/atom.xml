@@ -4,7 +4,7 @@
  <title>Pierre Osselin</title>
  <link href="http://localhost:4000/atom.xml" rel="self"/>
  <link href="http://localhost:4000/"/>
- <updated>2019-09-06T15:43:52+02:00</updated>
+ <updated>2019-09-09T15:09:49+02:00</updated>
  <id>http://localhost:4000</id>
  <author>
    <name></name>
@@ -28,42 +28,57 @@
    <id>http://localhost:4000/2019/08/25/Dirichlet-Process-For-Mixture</id>
    <content type="html">&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;Most of the time, cluster consists in model with fixed number of clusters such as k-means or mixture of Gaussians.&lt;/li&gt;
-  &lt;li&gt;Non parametric model, want to grow the number of clusters as the number of data grows, as well as the number of parameters.&lt;/li&gt;
-  &lt;li&gt;Proper may to model and infer number of clusters.&lt;/li&gt;
-  &lt;li&gt;Complexify the model with the complexity of the data in a automatic manner.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;Parametric model suffer over-under fitting and are subject to model selection. The bayesian nonparametric framework offer an alternative with a model complexity that adapts to the number of data in an automatic and scientifically founded manner.&lt;/p&gt;
+
+&lt;p&gt;Assuming we have infinite, exchangeable data
+&lt;script type=&quot;math/tex&quot;&gt;y_{1}, y_{2}, ...&lt;/script&gt;
+&lt;a href=&quot;https://en.wikipedia.org/wiki/De_Finetti%27s_theorem&quot;&gt;De Finetti’s theorem&lt;/a&gt; ensures the existence of a distribution
+&lt;script type=&quot;math/tex&quot;&gt;G&lt;/script&gt;
+such that the predictive distribution is given by
+&lt;script type=&quot;math/tex&quot;&gt;p(y_{1}, ..., y_{n}) = \int_{\Omega} p(y_{1}, ..., y_{n} | \theta)dG(\theta)&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;How can we know &lt;script type=&quot;math/tex&quot;&gt;G&lt;/script&gt; ? The main idea is to consider &lt;script type=&quot;math/tex&quot;&gt;G&lt;/script&gt; as a parameter to infer that lives in a space of distributions that put probability mass on sets
+&lt;script type=&quot;math/tex&quot;&gt;A \subset \Omega&lt;/script&gt;
+. Bayesian inference then requires to elicitate a prior on &lt;script type=&quot;math/tex&quot;&gt;G&lt;/script&gt; and allows us to define quantities such as &lt;script type=&quot;math/tex&quot;&gt;E(G(A))&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;Var(G(A))&lt;/script&gt; or &lt;script type=&quot;math/tex&quot;&gt;G(A)|y_{1}, ..., y_{n}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;With a specified observation model
+&lt;script type=&quot;math/tex&quot;&gt;p(\theta | y)&lt;/script&gt;
+ the posterior becomes
+ &lt;script type=&quot;math/tex&quot;&gt;p(\theta | y) \propto p(y|\theta)\int_{\mathcal{G}}p(\theta | G)\pi(dG)&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;Prior elicitation and careful modeling of the observation process still matter. The specified nonparametric model will have some structure that won’t adapt to every form of model mispecification.&lt;/p&gt;
+
+&lt;p&gt;Here we will review one nonparametric model, the Dirichlet Process, and implement it in the case of clustering.&lt;/p&gt;
 
 &lt;h2 id=&quot;the-dirichlet-process&quot;&gt;The Dirichlet process&lt;/h2&gt;
 
 &lt;h3 id=&quot;formal-definition&quot;&gt;Formal Definition&lt;/h3&gt;
 
-&lt;p&gt;The Dirichlet process is a stochastic process, whose finite distribution follows the Dirichlet distribution i.e:&lt;/p&gt;
+&lt;p&gt;The Dirichlet process is a stochastic process whose sample paths are probability measures. Given a distribution &lt;script type=&quot;math/tex&quot;&gt;H&lt;/script&gt; and a positive parameter &lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt;, we have, for any finite partition &lt;script type=&quot;math/tex&quot;&gt;A_{1}, ..., A_{n}&lt;/script&gt; of &lt;script type=&quot;math/tex&quot;&gt;\Omega&lt;/script&gt;:&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;G \sim DP(\alpha, H)&lt;/script&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;(G(A_{1}), ..., G(A_{n})) \sim Dirichlet(\alpha H(A_{1}), ..., \alpha H(A_{n}))&lt;/script&gt;
 
-&lt;p&gt;(Existence through the Extension theorem of Kolmogorov).&lt;/p&gt;
+&lt;p&gt;We have
+&lt;script type=&quot;math/tex&quot;&gt;E(G(A)) = H(A)&lt;/script&gt;
+ and &lt;script type=&quot;math/tex&quot;&gt;V(G(A)) = \frac{G(A)(1 - G(A))}{\alpha + 1}&lt;/script&gt;.&lt;/p&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;Distribution over distribution.&lt;/li&gt;
-  &lt;li&gt;Prior over distribution.&lt;/li&gt;
-  &lt;li&gt;Same support with infinitely countable number of elements.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;Hence, &lt;script type=&quot;math/tex&quot;&gt;H&lt;/script&gt; can be interpreted as the centered distribution and &lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt; the precision towards the centered distribution. This define the prior distribution for our nonparametric model.&lt;/p&gt;
 
 &lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\theta_{i} \sim G&lt;/script&gt; are i.i.d, however, marginalized over &lt;script type=&quot;math/tex&quot;&gt;G&lt;/script&gt; they are not independant, in particular, we can show that :&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;G | \theta_{1},..., \theta_{n} \sim DP \Bigg( n + \alpha, \frac{\alpha H + \sum\limits_{i = 1}^{n} \delta_{\theta_{i}}}{n + \alpha} \Bigg)&lt;/script&gt;
 
-&lt;p&gt;In particular, marginalized over G,&lt;/p&gt;
+&lt;p&gt;And, marginalized over &lt;script type=&quot;math/tex&quot;&gt;G&lt;/script&gt;:&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;\theta_{n+1} | \theta_{1},..., \theta_{n} \sim \frac{\alpha H + \sum\limits_{i = 1}^{n} \delta_{\theta_{i}}}{n + \alpha}&lt;/script&gt;
 
+&lt;p&gt;These equations gives insight into a nex representation of the parameters that we will explore now.&lt;/p&gt;
+
 &lt;h3 id=&quot;the-chinese-restaurant-process&quot;&gt;The Chinese Restaurant process&lt;/h3&gt;
 
-&lt;p&gt;We don’t expect all the &lt;script type=&quot;math/tex&quot;&gt;\theta_{i}&lt;/script&gt; to have distinct values, we can thus reinterpret our parameters &lt;script type=&quot;math/tex&quot;&gt;(\theta_{i})_{i = 1:n}&lt;/script&gt; to the parameters &lt;script type=&quot;math/tex&quot;&gt;\{ (\theta_{i}^{*})_{i = 1:K}, (S_{i})_{i = 1:K}\}&lt;/script&gt; where &lt;script type=&quot;math/tex&quot;&gt;\theta_{i}^{*} \sim H&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;(S_{1}, ..., S_{K})&lt;/script&gt; is a partition of &lt;script type=&quot;math/tex&quot;&gt;[n]&lt;/script&gt;, where &lt;script type=&quot;math/tex&quot;&gt;S_{k}&lt;/script&gt; corresponds to the labels &lt;script type=&quot;math/tex&quot;&gt;i&lt;/script&gt; such that &lt;script type=&quot;math/tex&quot;&gt;\theta_{i} = \theta_{k}^{*}&lt;/script&gt;. From this interpretation, we have:&lt;/p&gt;
+&lt;p&gt;As the previous equations show, we don’t expect all the &lt;script type=&quot;math/tex&quot;&gt;\theta_{i}&lt;/script&gt; to have distinct values, we can thus reinterpret our parameters &lt;script type=&quot;math/tex&quot;&gt;(\theta_{i})_{i = 1:n}&lt;/script&gt; to the parameters &lt;script type=&quot;math/tex&quot;&gt;\{ (\theta_{i}^{*})_{i = 1:K}, (S_{i})_{i = 1:K}\}&lt;/script&gt; where &lt;script type=&quot;math/tex&quot;&gt;\theta_{i}^{*} \sim H&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;(S_{1}, ..., S_{K})&lt;/script&gt; is a partition of &lt;script type=&quot;math/tex&quot;&gt;[n]&lt;/script&gt;, where &lt;script type=&quot;math/tex&quot;&gt;S_{k}&lt;/script&gt; corresponds to the labels &lt;script type=&quot;math/tex&quot;&gt;i&lt;/script&gt; such that &lt;script type=&quot;math/tex&quot;&gt;\theta_{i} = \theta_{k}^{*}&lt;/script&gt;. From this interpretation, we can reformulate our previous equation to:&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
 \theta_{n+1} | \theta_{1},..., \theta_{n} = \left\{
@@ -77,12 +92,14 @@
 
 &lt;p&gt;By following this iterative process we can directly infer the joint probability of the reparametrization:&lt;/p&gt;
 
-&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\pi(((\theta_{i}^{*}), S)) = P_{\alpha}(S) \times \prod\limits_{k = 1}^{K} H(\theta_{k}^{*})&lt;/script&gt;
-Where &lt;script type=&quot;math/tex&quot;&gt;P_{\alpha}(S) = \frac{\Gamma(\alpha) \alpha^{K} \prod\limits_{k = 1}^{K}\Gamma(n_{k})}{\Gamma(\alpha + n)}&lt;/script&gt;&lt;/p&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\pi(((\theta_{i}^{*}), S)) = P_{\alpha}(S) \times \prod\limits_{k = 1}^{K} H(\theta_{k}^{*})&lt;/script&gt;
 
-&lt;h3 id=&quot;stick-breaking-rule&quot;&gt;Stick Breaking Rule&lt;/h3&gt;
+&lt;p&gt;Where
+&lt;script type=&quot;math/tex&quot;&gt;P_{\alpha}(S) = \frac{\Gamma(\alpha) \alpha^{K} \prod\limits_{k = 1}^{K}\Gamma(n_{k})}{\Gamma(\alpha + n)}&lt;/script&gt; can be directly inferred by developping the chinese restaurant process and rearranging the terms.&lt;/p&gt;
 
-&lt;p&gt;There exist a way to sample a distribution G from &lt;script type=&quot;math/tex&quot;&gt;DP(\alpha, H)&lt;/script&gt; called “stick breaking rule” that works as follows:&lt;/p&gt;
+&lt;h3 id=&quot;stick-breaking-process&quot;&gt;Stick Breaking Process&lt;/h3&gt;
+
+&lt;p&gt;There exist a way to sample a distribution &lt;script type=&quot;math/tex&quot;&gt;G&lt;/script&gt; from &lt;script type=&quot;math/tex&quot;&gt;DP(\alpha, H)&lt;/script&gt; called the “stick breaking process” that works as follows:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;Sample &lt;script type=&quot;math/tex&quot;&gt;(w_{i})_{i = 1,...} \sim Beta(1,\alpha)&lt;/script&gt;&lt;/li&gt;
@@ -96,9 +113,10 @@ Where &lt;script type=&quot;math/tex&quot;&gt;P_{\alpha}(S) = \frac{\Gamma(\alph
   &lt;figcaption&gt;Exemple of samples from the Dirichlet Process centered on a Gaussian with alpha equal to 1 ,10 and 100.&lt;/figcaption&gt;
 &lt;/figure&gt;
 
+&lt;p&gt;The code to reproduce this process can be found &lt;a href=&quot;https://github.com/pierreosselin/dirichlet-process&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&quot;dirichlet-process-for-mixture&quot;&gt;Dirichlet process for Mixture&lt;/h2&gt;
 
-&lt;h3 id=&quot;finite-mixture&quot;&gt;Finite Mixture&lt;/h3&gt;
+&lt;h3 id=&quot;finite-mixture-model&quot;&gt;Finite Mixture Model&lt;/h3&gt;
 
 &lt;p&gt;A finite mixture model assumes that the data come from a mixture of a finite number of distributions.&lt;/p&gt;
 
@@ -110,9 +128,11 @@ Where &lt;script type=&quot;math/tex&quot;&gt;P_{\alpha}(S) = \frac{\Gamma(\alph
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;y_{n} | c_{n}, (\theta_{k}^{*})_{k = 1...K} \sim f(.|\theta_{c_{n}}^{*})&lt;/script&gt;
 
+&lt;p&gt;Here &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt; are latent variables describing the cluster the data come from. &lt;script type=&quot;math/tex&quot;&gt;H&lt;/script&gt; is the distribution the parameters of the observation model come from.&lt;/p&gt;
+
 &lt;h3 id=&quot;dirichlet-process-for-mixture-1&quot;&gt;Dirichlet Process for Mixture&lt;/h3&gt;
 
-&lt;p&gt;It can be showed that the marginal distribution converge in distribution to the marginal distribution arising from the Dirichlet Process for mixture modeling.&lt;/p&gt;
+&lt;p&gt;It can be showed that the marginal distribution of &lt;script type=&quot;math/tex&quot;&gt;\theta_{i}&lt;/script&gt; in the finite mixture model converges in distribution to the marginal distribution of the Dirichlet Process for mixture modeling defined by:&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;G \sim DP(\alpha, H)&lt;/script&gt;
 
@@ -136,13 +156,16 @@ Where &lt;script type=&quot;math/tex&quot;&gt;P_{\alpha}(S) = \frac{\Gamma(\alph
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;\pi((\theta^{*}, S) | y) \propto f(y | \theta^{*}, S) P_{\alpha}(S) \prod\limits_{k = 1}^{K}h(\theta^{*}_{k})&lt;/script&gt;
 
-&lt;p&gt;Techniques : MCMC + Variational Inference&lt;/p&gt;
+&lt;p&gt;The main techniques explored in order to perform inference are MCMC methods and Variational Inference methods. However, choosing the observation distribution
+&lt;script type=&quot;math/tex&quot;&gt;f(y|\theta)&lt;/script&gt;
+ to be conjugate with &lt;script type=&quot;math/tex&quot;&gt;H&lt;/script&gt; allows us to design a Gibbs Sampler that greatly improve performances.&lt;/p&gt;
 
 &lt;h3 id=&quot;gibbs-sampling&quot;&gt;Gibbs Sampling&lt;/h3&gt;
 
-&lt;p&gt;Choosing f and H such that conjugate priors allow us to derive a Gibbs sampler.&lt;/p&gt;
+&lt;p&gt;A Gibbs Sampler can be designed in the following manner to sample from the full posterior distribution
+&lt;script type=&quot;math/tex&quot;&gt;p(\theta^{*},S | y )&lt;/script&gt;:&lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\pi(\theta_{k}^{*} | \theta_{-k}^{*}, (y_{i})_{i}) \propto h(\theta_{k}^{*}) \times \prod\limits_{i \in S_{k}}f(y_{i}|\theta_{k}^{*})&lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\pi(\theta_{k}^{*} | \theta_{-k}^{*},S ,(y_{i})_{i}) \propto h(\theta_{k}^{*}) \times \prod\limits_{i \in S_{k}}f(y_{i}|\theta_{k}^{*})&lt;/script&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
 P(i \in S'^{k} | S^{-i}, y, \theta^{*}_{-i}) = \left\{
@@ -152,23 +175,30 @@ P(i \in S'^{k} | S^{-i}, y, \theta^{*}_{-i}) = \left\{
     \end{array}
 \right. %]]&gt;&lt;/script&gt;
 
-&lt;p&gt;If a new cluster is created, draw
-&lt;script type=&quot;math/tex&quot;&gt;\theta^{*} \sim \pi(\theta^{*} | y_{i}) \propto f(y_{i} | \theta^{*})H(\theta^{*})&lt;/script&gt;&lt;/p&gt;
+&lt;p&gt;If a new cluster is created, draw&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\theta^{*} \sim \pi(\theta^{*} | y_{i}) \propto f(y_{i} | \theta^{*})H(\theta^{*})&lt;/script&gt;
 
 &lt;h3 id=&quot;conjugate-priors&quot;&gt;Conjugate priors&lt;/h3&gt;
 
-&lt;p&gt;with&lt;/p&gt;
+&lt;p&gt;In the case we model our observation
+&lt;script type=&quot;math/tex&quot;&gt;y_{i} | \theta_{k}^{*}&lt;/script&gt;
+from a multivariate gaussian:&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;\theta^{*}_{k} = (\boldsymbol{\mu}_{k}^{*}, \boldsymbol{\Sigma}_{k}^{*})&lt;/script&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;y_{i} \sim \mathcal{N}(\boldsymbol{\mu_{k}}^{*}, \boldsymbol{\Sigma}_{k}^{*})&lt;/script&gt;
 
+&lt;p&gt;Then a conjugate prior for this distribution is the &lt;a href=&quot;https://en.wikipedia.org/wiki/Normal-inverse-Wishart_distribution&quot;&gt;Normal-Inverse Wishart distribution&lt;/a&gt; with the four hyperparameters
+&lt;script type=&quot;math/tex&quot;&gt;(\boldsymbol{\mu}_{0}, \lambda, \boldsymbol{\Psi}, \nu)&lt;/script&gt;:&lt;/p&gt;
+
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;(\boldsymbol{\mu_{k}}^{*}, \boldsymbol{\Sigma_{k}}^{*}) \sim NIW(\boldsymbol{\mu}_{0}, \lambda, \boldsymbol{\Psi}, \nu)&lt;/script&gt;
 
-&lt;p&gt;In this case we have:
-&lt;script type=&quot;math/tex&quot;&gt;\theta_{k}^{*} | y \sim NIW(\boldsymbol{\mu}_{n}, \lambda_{n}, \boldsymbol{\Psi}_{n}, \nu_{n})&lt;/script&gt;&lt;/p&gt;
+&lt;p&gt;In this case the posterior distribution can be written:&lt;/p&gt;
 
-&lt;p&gt;Where&lt;/p&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\theta_{k}^{*} | y \sim NIW(\boldsymbol{\mu}_{n}, \lambda_{n}, \boldsymbol{\Psi}_{n}, \nu_{n})&lt;/script&gt;
+
+&lt;p&gt;Where (Caution ! Wikipedia is wrong, check &lt;a href=&quot;https://www.ics.uci.edu/~sudderth/papers/sudderthPhD.pdf&quot;&gt;Erik B. Sudderth thesis&lt;/a&gt; instead).&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;\boldsymbol{\mu_{n}} = \frac{\lambda \boldsymbol{\mu}_{0} + n\boldsymbol{\bar{y}}}{\lambda + n}&lt;/script&gt;
 
@@ -176,19 +206,56 @@ P(i \in S'^{k} | S^{-i}, y, \theta^{*}_{-i}) = \left\{
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;\nu_{n} = \nu + n&lt;/script&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\boldsymbol{\Psi}_{n} =  \frac{\nu}{\nu + n} \boldsymbol{\Psi} + \boldsymbol{S} + \frac{\lambda n}{\lambda + n} (\boldsymbol{\bar{y}} - \boldsymbol{\mu_{0}})(\boldsymbol{\bar{y}} - \boldsymbol{\mu}_{0})^{T}&lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\boldsymbol{\Psi}_{n} =  \frac{\nu}{\nu_{n}} \boldsymbol{\Psi} + \frac{1}{\nu_{n}}\sum\limits_{i = 1}^{n} y_{i}y_{i}^{T} + \frac{\lambda}{\nu_{n}} \boldsymbol{\mu_{0}}\boldsymbol{\mu_{0}}^{T} - \frac{\lambda_{n}}{\nu + n} \boldsymbol{\mu_{n}}\boldsymbol{\mu_{n}}^{T}&lt;/script&gt;
 
-&lt;p&gt;With&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\boldsymbol{S} = \sum\limits_{i = 1}^{n} (\boldsymbol{y}_{i} - \boldsymbol{\bar{y}})(\boldsymbol{y}_{i} - \boldsymbol{\bar{y}})^{T}&lt;/script&gt;
-
-&lt;p&gt;The predictive likelihood follows a multivariate student t distribution with &lt;script type=&quot;math/tex&quot;&gt;(\nu_{n} - d + 1)&lt;/script&gt; that we will approximate by moment matching by a gaussian:&lt;/p&gt;
+&lt;p&gt;The predictive likelihood follows a multivariate student t distribution with &lt;script type=&quot;math/tex&quot;&gt;(\nu_{n} - d + 1)&lt;/script&gt; degrees of freedom that we will approximate by moment matching by a gaussian, which is a faithful representation when &lt;script type=&quot;math/tex&quot;&gt;\nu&lt;/script&gt; increases:&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;p(y | \boldsymbol{\mu}_{0}, \lambda, \boldsymbol{\Psi}, \nu) \sim \mathcal{N}(y; \boldsymbol{\mu}_{0}, \frac{(\lambda + 1)\nu}{\lambda(\nu - p - 1)} \boldsymbol{\Psi})&lt;/script&gt;
 
+&lt;h2 id=&quot;simulation&quot;&gt;Simulation&lt;/h2&gt;
+
+&lt;p&gt;The source code for the simulations can be found &lt;a href=&quot;https://github.com/pierreosselin/dirichlet-process&quot;&gt;here&lt;/a&gt;. The Gibbs Sampler with the previous priors is implemented and supports data of any dimension.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;objectDP&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DirichletMixtureConjugate&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multivariate_normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multivariate_normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multivariate_normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data4&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multivariate_normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;concatenate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;concatenate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;concatenate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;diri&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DirichletMixtureConjugate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;K_ini&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;diri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epoch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vis&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;figure class=&quot;image&quot;&gt;
+  &lt;img src=&quot;/imgs/2DCropped.png&quot; alt=&quot;Dirichlet process applied to four 2D dimensional Gaussians&quot; /&gt;
+  &lt;figcaption&gt;Dirichlet process applied to four 2D dimensional Gaussians&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;data1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multivariate_normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multivariate_normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multivariate_normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data4&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multivariate_normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.01&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eye&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;concatenate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;concatenate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;concatenate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;diri&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DirichletMixtureConjugate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;K_ini&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;diri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epoch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;vis&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;figure class=&quot;image&quot;&gt;
+  &lt;img src=&quot;/imgs/3Dcrop.png&quot; alt=&quot;Dirichlet process applied to four 3D dimensional Gaussians&quot; /&gt;
+  &lt;figcaption&gt;Dirichlet process applied to four 3D dimensional Gaussians&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;We can see that in both cases the clusters are recovered.&lt;/p&gt;
+
 &lt;h2 id=&quot;discussion&quot;&gt;Discussion&lt;/h2&gt;
 
-&lt;p&gt;This model allows to perforw non parametric bayesian inference, however, it shifts the problem to the design of the prior which establish the size a priori of a cluster.&lt;/p&gt;
+&lt;p&gt;This model allows to perform non parametric bayesian inference, however, it shifts the problem to the design of the prior which establish the size a priori of a cluster.&lt;/p&gt;
+
+&lt;p&gt;Is it Scalable?&lt;/p&gt;
+
+&lt;p&gt;How does it sustain dimensions?&lt;/p&gt;
+
+&lt;p&gt;Hierarchical Dirichlet Process?&lt;/p&gt;
 </content>
  </entry>
  
