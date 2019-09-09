@@ -203,7 +203,7 @@ $$
 $$
 
 $$
-    \boldsymbol{\Psi}_{n} =  \frac{\nu}{\nu_{n}} \boldsymbol{\Psi} + \frac{1}{\nu_{n}}\sum\limits_{i = 1}^{n} y_{i}y_{i}^{T} + \frac{\lambda}{\nu_{n}} \boldsymbol{\mu_{0}}\boldsymbol{\mu_{0}}^{T} - \frac{\lambda_{n}}{\nu + n} \boldsymbol{\mu_{n}}\boldsymbol{\mu_{n}}^{T}
+    \boldsymbol{\Psi}_{n} =  \boldsymbol{\Psi} + \sum\limits_{i = 1}^{n} y_{i}y_{i}^{T} + {\lambda} \boldsymbol{\mu_{0}}\boldsymbol{\mu_{0}}^{T} - \lambda_{n}\boldsymbol{\mu_{n}}\boldsymbol{\mu_{n}}^{T}
 $$
 
 The predictive likelihood follows a multivariate student t distribution with $$(\nu_{n} - d + 1)$$ degrees of freedom that we will approximate by moment matching by a gaussian, which is a faithful representation when $$\nu$$ increases:
@@ -218,30 +218,23 @@ The source code for the simulations can be found [here](https://github.com/pierr
 
 ```python
 from objectDP import DirichletMixtureConjugate
-data1 = np.random.multivariate_normal([0,0], 0.01*np.eye(2), 40)
-data2 = np.random.multivariate_normal([0,1], 0.01*np.eye(2), 40)
-data3 = np.random.multivariate_normal([1,0], 0.01*np.eye(2), 40)
-data4 = np.random.multivariate_normal([1,1], 0.01*np.eye(2), 40)
-data = np.concatenate((np.concatenate((np.concatenate((data1, data2)), data3)), data4))
-diri = DirichletMixtureConjugate(data, K_ini = 1)
-diri.fit(epoch = 3, vis = True)
+diri = DirichletMixtureConjugate(data)
+diri.fit(epoch = 30, vis = True)
 ```
 
-{% include image.html url="/imgs/2DCropped.png" description="Dirichlet process applied to four 2D dimensional Gaussians" %}
+<img src="{{ site.url }}/imgs/40.gif" style="align:center; margin: 0 auto; width:500px;">
+<p style="text-align: center; font-style: italic; font-size: 80%;">Dirichlet Process with 120 2D Gaussian points</p>
 
-```python
-data1 = np.random.multivariate_normal([0,0,0], 0.01*np.eye(3), 40)
-data2 = np.random.multivariate_normal([0,0,1], 0.01*np.eye(3), 40)
-data3 = np.random.multivariate_normal([0,1,0], 0.01*np.eye(3), 40)
-data4 = np.random.multivariate_normal([0,1,1], 0.01*np.eye(3), 40)
-data = np.concatenate((np.concatenate((np.concatenate((data1, data2)), data3)), data4))
-diri = DirichletMixtureConjugate(data, K_ini = 1)
-diri.fit(epoch = 3, vis = True)
-```
+<img src="{{ site.url }}/imgs/1600.gif" style="align:center; margin: 0 auto; width:500px;">
+<p style="text-align: center; font-style: italic; font-size: 80%;">Dirichlet Process with 1600 2D Gaussian points</p>
 
-{% include image.html url="/imgs/3Dcrop.png" description="Dirichlet process applied to four 3D dimensional Gaussians" %}
+<img src="{{ site.url }}/imgs/4000.gif" style="align:center; margin: 0 auto; width:500px;">
+<p style="text-align: center; font-style: italic; font-size: 80%;">Dirichlet Process with 4000 2D Gaussian points</p>
 
-We can see that in both cases the clusters are recovered.
+<img src="{{ site.url }}/imgs/3D.gif" style="align:center; margin: 0 auto; width:500px;">
+<p style="text-align: center; font-style: italic; font-size: 80%;">Dirichlet Process with 1600 2D Gaussian points</p>
+
+We can see that in these cases the state of the sampler quickly attain the expected states and stay in them consistently.
 
 ## Discussion
 
