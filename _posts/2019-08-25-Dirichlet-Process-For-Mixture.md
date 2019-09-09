@@ -217,16 +217,38 @@ $$
 The source code for the simulations can be found [here](https://github.com/pierreosselin/dirichlet-process). The Gibbs Sampler with the previous priors is implemented and supports data of any dimension.
 
 ```python
-
+from objectDP import DirichletMixtureConjugate
+data1 = np.random.multivariate_normal([0,0], 0.01*np.eye(2), 40)
+data2 = np.random.multivariate_normal([0,1], 0.01*np.eye(2), 40)
+data3 = np.random.multivariate_normal([1,0], 0.01*np.eye(2), 40)
+data4 = np.random.multivariate_normal([1,1], 0.01*np.eye(2), 40)
+data = np.concatenate((np.concatenate((np.concatenate((data1, data2)), data3)), data4))
+diri = DirichletMixtureConjugate(data, K_ini = 1)
+diri.fit(epoch = 3, vis = True)
 ```
 
+{% include image.html url="/imgs/2DCropped.png" description="Dirichlet process applied to four 2D dimensional Gaussians" %}
 
+```python
+data1 = np.random.multivariate_normal([0,0,0], 0.01*np.eye(3), 40)
+data2 = np.random.multivariate_normal([0,0,1], 0.01*np.eye(3), 40)
+data3 = np.random.multivariate_normal([0,1,0], 0.01*np.eye(3), 40)
+data4 = np.random.multivariate_normal([0,1,1], 0.01*np.eye(3), 40)
+data = np.concatenate((np.concatenate((np.concatenate((data1, data2)), data3)), data4))
+diri = DirichletMixtureConjugate(data, K_ini = 1)
+diri.fit(epoch = 3, vis = True)
+```
 
+{% include image.html url="/imgs/3Dcrop.png" description="Dirichlet process applied to four 3D dimensional Gaussians" %}
+
+We can see that in both cases the clusters are recovered.
 
 ## Discussion
 
-This model allows to perforw non parametric bayesian inference, however, it shifts the problem to the design of the prior which establish the size a priori of a cluster.
+This model allows to perform non parametric bayesian inference, however, it shifts the problem to the design of the prior which establish the size a priori of a cluster.
 
-## Ressources
+Is it Scalable?
 
-This blog as been
+How does it sustain dimensions?
+
+Hierarchical Dirichlet Process?
