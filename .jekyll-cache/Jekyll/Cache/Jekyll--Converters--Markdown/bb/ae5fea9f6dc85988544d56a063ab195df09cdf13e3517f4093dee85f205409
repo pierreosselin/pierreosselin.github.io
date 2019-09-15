@@ -1,0 +1,4 @@
+I"<p>In this post, we deal with datasets consisting of a social graph where each individual gives its top preferred other individuals in the network. The problematic is then to probabilistically model such a network in order to predict the behaviour of unknown individuals or infer network structures such as latent overlapping communities. We also discussed more refined situations where one can add covariates on individuals.</p>
+
+<p>The pdf for this analysis can be found <a href="/imgs/Dissertation.pdf">here</a>.</p>
+:ET
