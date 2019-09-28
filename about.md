@@ -4,7 +4,7 @@ title: About
 ---
 
 
-Hello! I'm an Oxford Graduate Student in machine learning at [Oxford](http://www.ox.ac.uk/), supervised by [François Caron](http://www.stats.ox.ac.uk/~caron/).
+Hello! I'm an Oxford Graduate Student in machine learning at [Oxford](http://www.ox.ac.uk/).
 
 My research interests are mainly in representation learning and generative models. Previously, I've worked on Statistical learning for hierarchical representation.
 
@@ -23,4 +23,4 @@ pierre.osselin (at) gmail.com
 
 <!-- <img src="{{ site.url }}/imgs/gscholar_icon.png" style="float: left; align: bottom; width:16px;">&nbsp;Google Scholar/[Pierre Osselin](https://scholar.google.com/citations?user=)  -->
 
-<!-- <img src="{{ site.url }}/imgs/d3_icon.png" style="float: left; align: bottom; width:16px;">&nbsp;d3 Blocks/[OsselinPierre](https://bl.ocks.org/) -->
+<!-- <img src="{{ site.url }}/imgs/d3_icon.png" style="float: left; align: bottom; width:16px;">&nbsp;d3 Blocks/[OsselinPierre](https://bl.ocks.org/) , supervised by [François Caron](http://www.stats.ox.ac.uk/~caron/)-->
