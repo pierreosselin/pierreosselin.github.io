@@ -4,11 +4,9 @@ title: About
 ---
 
 
-Hello! I'm an Oxford Graduate Student in machine learning at [Oxford](http://www.ox.ac.uk/).
+Hello! I'm an Oxford Graduate Student in Mathematics and Statistics at the university of [Oxford](http://www.ox.ac.uk/). I worked in particular on the modelisation of social networks from rank data, under the supervision of [François Caron](http://www.stats.ox.ac.uk/~caron/).
 
-My research interests are mainly in representation learning and generative models. Previously, I've worked on Statistical learning for hierarchical representation.
-
-Before starting my degree, I worked as a scientific programmer at [NovaDiscovery](https://www.novadiscovery.com/). I also studied Engineering at [Ecole Centrale Paris](https://www.centralesupelec.fr/) now CentraleSupelec.
+Before starting my degree, I  was scientific programmer at [NovaDiscovery](https://www.novadiscovery.com/), where I worked on the reduction of biological models (which are systems of non-linear differential equations of chemical species), using optimization, sensibility analysis and graph transformations. I also studied Engineering at [Ecole Centrale Paris](https://www.centralesupelec.fr/) now CentraleSupelec.
 
 
 ### Contact
