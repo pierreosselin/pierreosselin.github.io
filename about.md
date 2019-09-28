@@ -21,4 +21,4 @@ pierre.osselin (at) gmail.com
 
 <!-- <img src="{{ site.url }}/imgs/gscholar_icon.png" style="float: left; align: bottom; width:16px;">&nbsp;Google Scholar/[Pierre Osselin](https://scholar.google.com/citations?user=)  -->
 
-<!-- <img src="{{ site.url }}/imgs/d3_icon.png" style="float: left; align: bottom; width:16px;">&nbsp;d3 Blocks/[OsselinPierre](https://bl.ocks.org/) , supervised by [François Caron](http://www.stats.ox.ac.uk/~caron/)-->
+<!-- <img src="{{ site.url }}/imgs/d3_icon.png" style="float: left; align: bottom; width:16px;">&nbsp;d3 Blocks/[OsselinPierre](https://bl.ocks.org/) -->

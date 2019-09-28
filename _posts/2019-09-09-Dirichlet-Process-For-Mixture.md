@@ -210,7 +210,7 @@ $$
     \boldsymbol{\Psi}_{n} =  \boldsymbol{\Psi} + \sum\limits_{i = 1}^{n} y_{i}y_{i}^{T} + {\lambda} \boldsymbol{\mu_{0}}\boldsymbol{\mu_{0}}^{T} - \lambda_{n}\boldsymbol{\mu_{n}}\boldsymbol{\mu_{n}}^{T}
 $$
 
-The predictive likelihood follows a multivariate student t distribution with $$(\nu_{n} - d + 1)$$ degrees of freedom that we will approximate by moment matching by a gaussian, which is a faithful representation when $$\nu$$ increases:
+The predictive likelihood follows a multivariate student t distribution with $$(\nu_{n} - d + 1)$$ degrees of freedom that we will approximate by moment matching by a gaussian, which is a faithful representation (according to the [Kullback-Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence)) when $$\nu$$ increases:
 
 $$
     p(y | \boldsymbol{\mu}_{0}, \lambda, \boldsymbol{\Psi}, \nu) \sim \mathcal{N}(y; \boldsymbol{\mu}_{0}, \frac{(\lambda + 1)\nu}{\lambda(\nu - p - 1)} \boldsymbol{\Psi})
