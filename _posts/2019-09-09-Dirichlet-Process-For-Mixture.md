@@ -57,7 +57,7 @@ And, marginalized over $$G$$:
 
 $$\theta_{n+1} | \theta_{1},..., \theta_{n} \sim \frac{\alpha H + \sum\limits_{i = 1}^{n} \delta_{\theta_{i}}}{n + \alpha}$$
 
-These equations gives insight into a nex representation of the parameters that we will explore now.
+These equations gives insight into a new representation of the parameters that we will explore now.
 
 ### The Chinese Restaurant process
 
@@ -90,7 +90,7 @@ There exist a way to sample a distribution $$G$$ from $$DP(\alpha, H)$$ called t
 * Compute $$\pi_{i}(w) = w_{i}*\prod\limits_{j = 1}^{i - 1}(1 - w_{j})$$
 * Return $$G = \sum\limits_{i = 1}^{\infty} \pi_{i}(w)\delta_{\theta_{i}^{*}}$$
 
-This interpretation is very insteresting, because we see that sampling a distribution according to the Dirichlet Process compute an infinite probabitily vector corresponding to parameters sampled from the base distribution $$H$$.
+This interpretation is very interesting, because we see that sampling a distribution according to the Dirichlet Process compute an infinite probabitily vector corresponding to parameters sampled from the base distribution $$H$$.
 
 {% include image.html url="/imgs/plotBreak.png" description="Exemple of samples from the Dirichlet Process centered on a Gaussian with alpha equal to 1 ,10 and 100." %}
 
