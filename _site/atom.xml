@@ -4,7 +4,7 @@
  <title>Pierre Osselin</title>
  <link href="http://localhost:4000/atom.xml" rel="self"/>
  <link href="http://localhost:4000/"/>
- <updated>2019-09-28T16:28:35+02:00</updated>
+ <updated>2020-04-13T14:56:09+02:00</updated>
  <id>http://localhost:4000</id>
  <author>
    <name></name>
@@ -201,7 +201,7 @@ from a multivariate gaussian:&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;\boldsymbol{\Psi}_{n} =  \boldsymbol{\Psi} + \sum\limits_{i = 1}^{n} y_{i}y_{i}^{T} + {\lambda} \boldsymbol{\mu_{0}}\boldsymbol{\mu_{0}}^{T} - \lambda_{n}\boldsymbol{\mu_{n}}\boldsymbol{\mu_{n}}^{T}&lt;/script&gt;
 
-&lt;p&gt;The predictive likelihood follows a multivariate student t distribution with &lt;script type=&quot;math/tex&quot;&gt;(\nu_{n} - d + 1)&lt;/script&gt; degrees of freedom that we will approximate by moment matching by a gaussian, which is a faithful representation when &lt;script type=&quot;math/tex&quot;&gt;\nu&lt;/script&gt; increases:&lt;/p&gt;
+&lt;p&gt;The predictive likelihood follows a multivariate student t distribution with &lt;script type=&quot;math/tex&quot;&gt;(\nu_{n} - d + 1)&lt;/script&gt; degrees of freedom that we will approximate by moment matching by a gaussian, which is a faithful representation (according to the &lt;a href=&quot;https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence&quot;&gt;Kullback-Leibler divergence&lt;/a&gt;) when &lt;script type=&quot;math/tex&quot;&gt;\nu&lt;/script&gt; increases:&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;p(y | \boldsymbol{\mu}_{0}, \lambda, \boldsymbol{\Psi}, \nu) \sim \mathcal{N}(y; \boldsymbol{\mu}_{0}, \frac{(\lambda + 1)\nu}{\lambda(\nu - p - 1)} \boldsymbol{\Psi})&lt;/script&gt;
 
