@@ -1,4 +1,4 @@
-I"XD<h2 id="introduction">Introduction</h2>
+I"×D<h2 id="introduction">Introduction</h2>
 
 <p>Parametric model suffer over-under fitting and are subject to model selection. The bayesian nonparametric framework offer an alternative with a model complexity that adapts to the number of data in an automatic and scientifically founded manner.</p>
 
@@ -182,7 +182,7 @@ from a multivariate gaussian:</p>
 
 <script type="math/tex; mode=display">\boldsymbol{\Psi}_{n} =  \boldsymbol{\Psi} + \sum\limits_{i = 1}^{n} y_{i}y_{i}^{T} + {\lambda} \boldsymbol{\mu_{0}}\boldsymbol{\mu_{0}}^{T} - \lambda_{n}\boldsymbol{\mu_{n}}\boldsymbol{\mu_{n}}^{T}</script>
 
-<p>The predictive likelihood follows a multivariate student t distribution with <script type="math/tex">(\nu_{n} - d + 1)</script> degrees of freedom that we will approximate by moment matching by a gaussian, which is a faithful representation when <script type="math/tex">\nu</script> increases:</p>
+<p>The predictive likelihood follows a multivariate student t distribution with <script type="math/tex">(\nu_{n} - d + 1)</script> degrees of freedom that we will approximate by moment matching by a gaussian, which is a faithful representation (according to the <a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence">Kullback-Leibler divergence</a>) when <script type="math/tex">\nu</script> increases:</p>
 
 <script type="math/tex; mode=display">p(y | \boldsymbol{\mu}_{0}, \lambda, \boldsymbol{\Psi}, \nu) \sim \mathcal{N}(y; \boldsymbol{\mu}_{0}, \frac{(\lambda + 1)\nu}{\lambda(\nu - p - 1)} \boldsymbol{\Psi})</script>
 
