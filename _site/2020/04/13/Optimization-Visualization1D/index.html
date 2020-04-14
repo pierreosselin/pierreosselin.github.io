@@ -11,7 +11,7 @@
 
   <title>
     
-      Efficient community detection in sparse networks with non-backtracking random walkers &middot; Pierre Osselin
+      Optimization Visualization1d &middot; Pierre Osselin
     
   </title>
 
@@ -28,8 +28,14 @@
 
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="http://localhost:4000/public/css/graph.css"  />
+  <link rel="stylesheet" type="text/css" href="http://localhost:4000/public/css/buttons.css"  />
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <script src="http://mlweb.loria.fr/lalolib.js"></script>
 </head>
-
 
   <body>
 
@@ -96,53 +102,84 @@
 
 
     <div class="content container">
-      <div class="post">
-  <h1 class="post-title">Efficient community detection in sparse networks with non-backtracking random walkers</h1>
-  <span class="post-date">07 Sep 2019</span>
-  <p>This post present the report of my mini project of the course “Networks” at the university of Oxford. It deals with the apparent lack of performance of community detection of classical spectral methods and present the operators introduced in the litterature to overcome this problem.</p>
-
-<p>The report of the mini project can be found <a href="/imgs/MiniProjectNetwork.pdf">here</a>.</p>
-
-</div>
-
-<!-- mathjax (to render equations) -->
-<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-<div class="related">
-  <h2>Related Posts</h2>
-  <ul class="related-posts">
-    
-      <li>
-        <h3>
-          <a href="/2020/04/13/Optimization-Visualization1D/">
-            Optimization Visualization1d
-            <small>13 Apr 2020</small>
-          </a>
-        </h3>
-      </li>
-    
-      <li>
-        <h3>
+      
+        
+      
+        
+        <div align="center">
           <a href="/2020/04/13/Optimization-Visualization/">
-            Optimization Visualization
-            <small>13 Apr 2020</small>
+            Visualization of 2D Functions
           </a>
-        </h3>
-      </li>
-    
-      <li>
-        <h3>
-          <a href="/2019/09/09/Dirichlet-Process-For-Mixture/">
-            Dirichlet Process for mixture modeling and Application
-            <small>09 Sep 2019</small>
-          </a>
-        </h3>
-      </li>
-    
-  </ul>
+        </div>
+        
+      
+        
+      
+        
+      
+        
+      
+      <div id="algoButtonSpace" class="buttonGroup"></div>
+<div id="algoParamsButtonSpace" class="buttonGroup">
+  <label for="xini">Initial point:</label>
+  <input type="number" id="xini" value=1.5 step=0.1>
+  <label for="step">Descent step:</label>
+  <input type="number" id="step" value=0.8 step=0.1>
 </div>
+<svg id="svg1" class="svg-content-responsive" style="margin: 0 auto; display: block;"></svg>
+<div id="documentation" align="center"></div>
 
-<div id="disqus_thread"></div>
+<script src="http://localhost:4000/assets/js/gradient_descent.js"></script>
+<script src="http://localhost:4000/assets/js/config.js"></script>
+<script src="http://localhost:4000/assets/js/ParameterInput.js"></script>
+<script src="http://localhost:4000/assets/js/documentationDisplay.js"></script>
+<script src="http://localhost:4000/assets/js/ApplicationManager.js"></script>
+<script src="http://localhost:4000/assets/js/graph_plot.js"></script>
+<script>
+  const xDomain = paramsConfig[paramNames.xDomain].values[plotTypes.plot_1D].get_init_value(
+    null,
+    paramsConfig[paramNames.objectiveFunction].values[plotTypes.plot_1D].get_init_value().name
+  );
+  let graphPlot = new GraphPlot(d3.select('#svg1'), xDomain, 600, 600);
+  new ApplicationManager(graphPlot);
+</script>
+
+
+      <div class="related">
+        <h2>Related Posts</h2>
+        <ul class="related-posts">
+          
+            <li>
+              <h3>
+                <a href="/2020/04/13/Optimization-Visualization/">
+                  Optimization Visualization
+                  <small>13 Apr 2020</small>
+                </a>
+              </h3>
+            </li>
+          
+            <li>
+              <h3>
+                <a href="/2019/09/09/Dirichlet-Process-For-Mixture/">
+                  Dirichlet Process for mixture modeling and Application
+                  <small>09 Sep 2019</small>
+                </a>
+              </h3>
+            </li>
+          
+            <li>
+              <h3>
+                <a href="/2019/09/08/Rank/">
+                  Modeling and analysis of social network data from rank preferences
+                  <small>08 Sep 2019</small>
+                </a>
+              </h3>
+            </li>
+          
+        </ul>
+      </div>
+
+      <div id="disqus_thread"></div>
 <script>
 
 /**
@@ -150,8 +187,8 @@
 *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
 /*
 var disqus_config = function () {
-this.page.url = 'http://localhost:4000/2019/09/07/Networks/';  // Replace PAGE_URL with your page's canonical URL variable
-this.page.identifier = '/2019/09/07/Networks/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+this.page.url = 'http://localhost:4000/2020/04/13/Optimization-Visualization1D/';  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = '/2020/04/13/Optimization-Visualization1D/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
 };
 */
 (function() { // DON'T EDIT BELOW THIS LINE
@@ -163,8 +200,6 @@ s.setAttribute('data-timestamp', +new Date());
 </script>
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
-
     </div>
-
   </body>
 </html>

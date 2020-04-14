@@ -2,7 +2,6 @@
 layout: post
 title: Dirichlet Process for mixture modeling and Application
 post_description: The motivation of this blog post is to focus on the main rationale behind the use of nonparametric models in machine learning, and to specifically study one example of such model, the Dirichlet Process.
-#img_excerpt: imgs/3d-clusters.png
 ---
 
 ## Introduction
