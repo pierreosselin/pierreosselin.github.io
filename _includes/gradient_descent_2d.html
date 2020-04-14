@@ -1,41 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-  <link rel="stylesheet" type="text/css" href="{{ site.url }}/public/css/graph.css"  />
-  <link rel="stylesheet" type="text/css" href="{{ site.url }}/public/css/buttons.css"  />
-  <script src="https://d3js.org/d3.v5.min.js"></script>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-  <script src="http://mlweb.loria.fr/lalolib.js"></script>
-</head>
-<body>
-  <li><a href="gradient_descent_1d.html">Gradient descent 1D</a></li>
-  <div id="algoButtonSpace" class="buttonGroup"></div>
-  <div id="algoParamsButtonSpace" class="buttonGroup"></div>
+<div id="algoButtonSpace" class="buttonGroup"></div>
+<div id="algoParamsButtonSpace" class="buttonGroup"></div>
 
-  <svg id="svg1" class="svg-content-responsive" style="margin: 0 auto; display: block;"></svg>
+<svg id="svg1" class="svg-content-responsive" style="margin: 0 auto; display: block;"></svg>
 
-  <div id="documentation" align="center"></div>
-  <script src="{{ site.url }}/assets/js/gradient_descent.js"></script>
-  <script src="{{ site.url }}/assets/js/config.js"></script>
-  <script src="{{ site.url }}/assets/js/ParameterInput.js"></script>
-  <script src="{{ site.url }}/assets/js/documentationDisplay.js"></script>
-  <script src="{{ site.url }}/assets/js/ApplicationManager.js"></script>
-  <script src="{{ site.url }}/assets/js/contour_plot.js"></script>
-  <script>
-    const initialObjective = paramsConfig[paramNames.objectiveFunction].values[plotTypes.contour_plot].get_init_value().name;
-    const xDomain = paramsConfig[paramNames.xDomain].values[plotTypes.contour_plot].get_init_value(null, initialObjective);
-    const yDomain = paramsConfig[paramNames.yDomain].values[plotTypes.contour_plot].get_init_value(null, initialObjective);
-    let contourPlot = new ContourPlot(
-      d3.select('#svg1'),
-      xDomain,
-      yDomain,
-      600,
-      600,
-    );
-    new ApplicationManager(contourPlot);
-  </script>
-</body>
-</html>
+<div id="documentation" align="center"></div>
+<script src="{{ site.url }}/assets/js/gradient_descent.js"></script>
+<script src="{{ site.url }}/assets/js/config.js"></script>
+<script src="{{ site.url }}/assets/js/ParameterInput.js"></script>
+<script src="{{ site.url }}/assets/js/documentationDisplay.js"></script>
+<script src="{{ site.url }}/assets/js/ApplicationManager.js"></script>
+<script src="{{ site.url }}/assets/js/contour_plot.js"></script>
+<script>
+  const initialObjective = paramsConfig[paramNames.objectiveFunction].values[plotTypes.contour_plot].get_init_value().name;
+  const xDomain = paramsConfig[paramNames.xDomain].values[plotTypes.contour_plot].get_init_value(null, initialObjective);
+  const yDomain = paramsConfig[paramNames.yDomain].values[plotTypes.contour_plot].get_init_value(null, initialObjective);
+  let contourPlot = new ContourPlot(
+    d3.select('#svg1'),
+    xDomain,
+    yDomain,
+    600,
+    600,
+  );
+  new ApplicationManager(contourPlot);
+</script>
