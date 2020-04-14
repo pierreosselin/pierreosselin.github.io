@@ -17,7 +17,11 @@
       <a href="https://twitter.com/{{ site.twitter_name }}">
         <i class="fa fa-twitter"></i>
       </a>
-      <p class="lead">{{ site.description }}</p>
+      {% if site.description == true %}
+        <p class="lead"> </p>
+      {% else %}
+        <p class="lead">{{ site.description }}</p>
+      {% endif %}
 
     </div>
 

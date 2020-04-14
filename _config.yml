@@ -8,7 +8,9 @@ permalink:        pretty
 # Setup
 title:            Pierre Osselin
 tagline:          Machine Learning
-description:
+
+# Change description in text to add description
+description:      true
 url:              https://pierreosselin.github.io
 baseurl:
 plugins:
