@@ -4,13 +4,31 @@
  <title>Pierre Osselin</title>
  <link href="http://localhost:4000/atom.xml" rel="self"/>
  <link href="http://localhost:4000/"/>
- <updated>2020-04-13T14:56:09+02:00</updated>
+ <updated>2020-04-14T10:45:58+02:00</updated>
  <id>http://localhost:4000</id>
  <author>
    <name></name>
    <email></email>
  </author>
 
+ 
+ <entry>
+   <title>Optimization Visualization1d</title>
+   <link href="http://localhost:4000/2020/04/13/Optimization-Visualization1D/"/>
+   <updated>2020-04-13T00:00:00+02:00</updated>
+   <id>http://localhost:4000/2020/04/13/Optimization-Visualization1D</id>
+   <content type="html">
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Optimization Visualization</title>
+   <link href="http://localhost:4000/2020/04/13/Optimization-Visualization/"/>
+   <updated>2020-04-13T00:00:00+02:00</updated>
+   <id>http://localhost:4000/2020/04/13/Optimization-Visualization</id>
+   <content type="html">
+</content>
+ </entry>
  
  <entry>
    <title>Dirichlet Process for mixture modeling and Application</title>
