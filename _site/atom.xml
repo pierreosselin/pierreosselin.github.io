@@ -4,7 +4,7 @@
  <title>Pierre Osselin</title>
  <link href="http://localhost:4000/atom.xml" rel="self"/>
  <link href="http://localhost:4000/"/>
- <updated>2020-04-14T11:33:41+02:00</updated>
+ <updated>2020-04-14T16:47:39+02:00</updated>
  <id>http://localhost:4000</id>
  <author>
    <name></name>
@@ -22,10 +22,10 @@
  </entry>
  
  <entry>
-   <title>Optimization Visualization</title>
-   <link href="http://localhost:4000/2020/04/13/Optimization-Visualization/"/>
+   <title>Optimization Interactive Visualization</title>
+   <link href="http://localhost:4000/2020/04/13/Optimization-Interactive-Visualization/"/>
    <updated>2020-04-13T00:00:00+02:00</updated>
-   <id>http://localhost:4000/2020/04/13/Optimization-Visualization</id>
+   <id>http://localhost:4000/2020/04/13/Optimization-Interactive-Visualization</id>
    <content type="html">
 </content>
  </entry>
