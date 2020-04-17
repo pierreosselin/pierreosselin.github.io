@@ -448,7 +448,7 @@ const paramsConfig = {
   },
 };
 
-const docConfig = {
+const docConfigFunctions = {
   [plotTypes.plot_1D]: {
   "square" : {name : "Square Function", value : "$$f(x) = x^{2}$$"},
   "pow3" : {name : "Power-3 Function", value : "$$f(x) = x^{3}$$"},
@@ -472,4 +472,62 @@ const docConfig = {
   "mccormick" : {name : "McCormick Function", value : "$$f(x,y) = \\sin (x + y) + (x - y)^{2} - 1.5 x + 2.5 y + 1$$"},
   "styblinski" : {name : "Styblinski-Tang Function", value : "$$f(x,y) = 0.5 (x^{4} - 16 x^{2} + 5 x + y^{4} - 16 y^{2} + 5 y)$$"},
   },
+}
+
+const docConfigAlgorithms = {
+  [algorithmNames.gradientDescent]: {name : "Gradient Descent Algorithm", value :
+  "The Gradient Descent Algorithm is given by the following formula : \
+  $$x_{k + 1} = x_{k} - \\alpha \\nabla_{x} f(x_{k})$$ \
+  Where \\( \\alpha \\) is called the learning rate. At every iteration, this algorithm takes a step towards the direction of the steepest descent of the function, given by the opposite of its gradient. \
+  Although it is the simplest first-order method, it is guaranteed to converge to a local minimum if the objective function is bounded below, has a Lipschitz continuous gradient, and if the step is chosen \
+  according to some criterion such as the bArmijo linesearch (not implemented for the moment)."
+  },
+  [algorithmNames.gradientDescentWithMomentum]: {name : "Gradient Descent Algorithm with Momentum", value :
+  "The Gradient Descent Algorithm with Momentum is given by the following formula : \
+  $$x_{k + 1} = x_{k} - v_{k}$$ \
+  $$v_{k} = \\gamma v_{k-1} + \\alpha \\nabla_{x} f(x_{k})$$ \
+  Where \\( \\alpha \\) is called the learning rate and \\( \\gamma \\) is the momentum. \
+  The momentum steers the optimizer to explore the space according to the previous gradients direction."
+  },
+  [algorithmNames.gradientDescentMomentumNesterov]: {name : "Gradient Descent Algorithm with Nesterov Momentum", value :
+  "The Gradient Descent Algorithm with Nesterov Momentum is given by the following formula : \
+  $$x_{k + 1} = x_{k} - v_{k}$$ \
+  $$v_{k} = \\gamma v_{k-1} + \\alpha \\nabla_{x} f(x_{k} - \\gamma v_{k-1})$$ \
+  Where \\( \\alpha \\) is called the learning rate and \\( \\gamma \\) is the momentum. \
+  The intuition behind Nesterov Momentum, is to look \" one step ahead \" according to our estimate of the next point, and carry out a correction with the comupted gradient at this points"
+  },
+  [algorithmNames.RMSProp]: {name : "RMSProp Algorithm", value :
+  "The RMSProp Algorithm is given by the following formula : \
+  $$x_{k + 1} = x_{k} - \\frac{\\alpha}{\\sqrt{E[g^{2}]_{k} + \\epsilon}}g_{k}$$ \
+  $$E[g^{2}]_{k} = \\gamma E[g^{2}]_{k-1} + (1 - \\gamma) \\nabla_{x} f(x_{k})$$ \
+  Where \\( \\alpha \\) is called the learning rate and \\( \\gamma \\) plays the role of the momentum for the square average, \\( \\epsilon \\) is small as to avoid dividing by zero. The elementary operations above are done element-wise.\
+  This algorithm allows to adapt the learning rate (dimension-wise) to the local \" roughness \" of the function, the locality being determined by \\( \\gamma \\) (a bigger \\( \\gamma \\) allows a more long-term memory)."
+  },
+  [algorithmNames.adam]: {name : "ADAM Algorithm", value :
+  "The ADAM Algorithm is given by the following formula : \
+  $$x_{k + 1} = x_{k} - \\frac{\\alpha}{\\sqrt{\\hat{v}_{k}} + \\epsilon}\\hat{m}_{k}$$ \
+  $$ \\hat{m}_{k} = \\frac{m_{k}}{1 - \\beta_{1}^{k}} \\text{ and } \\hat{v}_{k} = \\frac{v_{k}}{1 - \\beta_{2}^{k}}$$ \
+  $$ \\hat{m}_{k} = \\beta_{1} m_{k-1} + (1 - \\beta_{1}) \\nabla_{x} f(x_{k}) \\text{ and } \\hat{v}_{k} = \\beta_{2} v_{k-1} + (1 - \\beta_{2}) (\\nabla_{x} f(x_{k}))^{2}$$ \
+  Where \\( \\alpha \\) is called the learning rate, \\( \\beta_{1} \\) and \\( \\beta_{2} \\) are the momentum of the gradient and square gradient respectively. The parameter \\( \\epsilon \\) is used to avoid dividing by zero  \
+  The Adam Algorithm combine the momentum and adaptative learning rates components, which present some more desirable behaviour towards certain types of loss shapes such as flat minima. The corrected estimates of the gradient and square gradient used in the final \
+  parameter update is computed to avoid a bias of towards zero, which is all the more present at initialization"
+  },
+  [algorithmNames.bfgs]: {name : "BFGS Algorithm", value :
+  "The BFGS Algorithm, from the category of the Quasi-Newton methods is given by the following formula : \
+  $$x_{k + 1} = x_{k} - \\alpha B_{k}^{-1} \\nabla_{x} f(x_{k})$$ \
+  $$B_{k + 1} = B_{k} + \\frac{y_{k} y_{k}^{T}}{\\langle s_{k}, y_{k} \\rangle} - \\frac{B_{k}s_{k}s_{k}^{T}B_{k}}{\\langle s_{k}, B_{k}s_{k} \\rangle}$$ \
+  Where \\( \\alpha \\) is called the learning rate and \\( B_{0} = I \\). \
+  \\( B_{k} \\) represents an approximation to the Hessian, the algorithm then tries to minimize the function by creating a quadratic (strictly convex) surogate model of the objective function. The computed direction  \\( B_{k}^{-1} \\nabla_{x} f(x_{k}) \\) is the optimal step according to this model \
+  (if you put the learning rate to one, in four steps you reach the minimum for the square function). The \\( B_{k} \\) is updated by levering the information about the hessian embedded in the successive gradients. \
+  More precisely, the BFGS update is computed as a two-rank update (preserving the property of symmetric, positive definite of \\( B_{k} \\) ) according to the secant condition: \
+  $$B_{k+1}(x_{k+1} - x_{k}) = \\nabla_{x}f(x_{k+1}) - \\nabla_{x}f(x_{k}) $$"
+  },
+  [algorithmNames.newton]: {name : "Newton Algorithm", value :
+  "The Newton Algorithm, a second-order method, is given by the following formula : \
+  $$x_{k + 1} = x_{k} - \\alpha (\\nabla^{2}_{x} f(x_{k}))^{-1} \\nabla_{x} f(x_{k})$$ \
+  Where \\( \\alpha \\) is called the learning rate. This method build a quadratic surrogate model of the objective function by computing its gradient and hessian at the current point \
+  and compute its optimal step (more precisely, the location where the gradient vanishes, which is optimal iff the hessian is positive definite). One of the advantage of this method is that it is scale-invariant \
+  (it performs well in valleys). If you put the learning rate to one, you find the optimal value for the square function in one step, it would be true for the quadratic function no matter the scale inhomogeneity."
+  },
+
 }
