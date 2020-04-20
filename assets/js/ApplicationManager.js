@@ -44,12 +44,16 @@ class ApplicationManager {
       xini => this.setParam(paramNames.x_ini, xini),
       "#svg1"
     );
-
     try {
       this.plotDoc(paramNames.objectiveFunction);
     }
     finally {
-      this.plotDoc(paramNames.algorithmName);
+      try {
+        this.plotDoc(paramNames.algorithmName);
+      }
+      finally {
+        this.plotDoc(paramNames.barmijo)
+      }
     }
   }
 
@@ -182,6 +186,9 @@ class ApplicationManager {
 
     if (paramsConfig[paramName].input_type === inputTypes.dropdown) {
       this.algoParams[paramName] = value.value;
+      if (paramName === paramNames.barmijo) {
+        this.plotDoc(paramName)
+      }
     } else {
       this.algoParams[paramName] = parseFloat(value);
     }
@@ -198,7 +205,10 @@ class ApplicationManager {
         let initValue;
         if (param === paramNames.objectiveFunction) {
           initValue = this.objectiveFunction;
-        } else {
+        } else if (param === paramNames.barmijo) {
+          initValue = (this.algoParams[param] ? 'Yes' : 'No');
+        }
+        else {
           initValue = this.algoParams[param];
         }
         const onValueChanged = value => this.setParam(param, value);
@@ -227,10 +237,13 @@ class ApplicationManager {
 
   plotDoc(paramName) {
     if (paramName === paramNames.objectiveFunction){
-      documentationFactory(this.objectiveFunction.name, docConfigFunctions[this.plot.getType()], "#documentationFunction");
+      documentationFactoryFunction(this.objectiveFunction.name, docConfigFunctions[this.plot.getType()], "#documentationFunction");
     }
     if (paramName === paramNames.algorithmName){
-      documentationFactory(this.algo.name, docConfigAlgorithms, "#documentationAlgo");
+      documentationFactoryAlgo(this.algo.name, docConfigAlgorithms, "#documentationAlgo");
+    }
+    if (paramName === paramNames.barmijo){
+      documentationFactoryBarmijo(this.algoParams[paramName], docConfigBacktracking, "#documentationBacktracking");
     }
   }
 }

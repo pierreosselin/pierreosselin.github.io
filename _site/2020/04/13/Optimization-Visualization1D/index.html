@@ -128,10 +128,11 @@
   <label for="step">Descent step:</label>
   <input type="number" id="step" value=0.8 step=0.1>
 </div>
+
 <svg id="svg1" class="svg-content-responsive" style="margin: 0 auto; display: block;"></svg>
 <div id="documentationFunction" align="center"></div>
 <div id="documentationAlgo" align="center"></div>
-
+<div id="documentationBacktracking" align="center"></div>
 <script src="http://localhost:4000/assets/js/gradient_descent.js"></script>
 <script src="http://localhost:4000/assets/js/config.js"></script>
 <script src="http://localhost:4000/assets/js/ParameterInput.js"></script>
@@ -139,6 +140,7 @@
 <script src="http://localhost:4000/assets/js/ApplicationManager.js"></script>
 <script src="http://localhost:4000/assets/js/graph_plot.js"></script>
 <script>
+  setDoc("http://localhost:4000");
   const xDomain = paramsConfig[paramNames.xDomain].values[plotTypes.plot_1D].get_init_value(
     null,
     paramsConfig[paramNames.objectiveFunction].values[plotTypes.plot_1D].get_init_value().name

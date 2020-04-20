@@ -1,5 +1,8 @@
 /** Abstract class Algorithm is only used to define the following API for implemented algorithmNames:
 * @method one_step : Perform one step of the algorithm
+* @method one_step : Perform one step of the algorithm
+* @method one_step_armijo : Perform one step of the algorithm with backtracking search
+* @method compute_direction : Compute the opposite direction in this.direction, has to also compute the gradient in this.gradient
 * @method optimize : Perform optimization wth given criterion
 * @method get_path : Get the path of the optimization
 */
@@ -14,8 +17,10 @@ class Algorithm {
     this.path = [];
   }
 
-  one_step(){}
+  compute_direction(){}
 
+  one_step(){}
+  one_step_armijo(){}
   optimize(){}
 
   getPath = () => this.path;
@@ -34,6 +39,9 @@ class AlgorithmFirstOrder extends Algorithm{
     this.x = this.x_ini.map(x => x);
     this.h = params[paramNames.h];
     this.delta = params[paramNames.delta];
+    this.beta = 0.1; // Initial Beta, button has to be implemented
+    this.tau = 0.75;
+    this.flag_barmijo = params[paramNames.barmijo];
   }
 
   differentiate(arr) {
@@ -50,9 +58,33 @@ class AlgorithmFirstOrder extends Algorithm{
     })
   }
 
+  one_step() {
+    let norm = this.compute_direction();
+    this.x = this.x.map((x, i) => x - this.delta * this.direction[i])
+    return norm
+  }
+
+  one_step_armijo() {
+    let norm = this.compute_direction();
+    let current_delta = this.delta;
+    while (this.objective(this.x.map((x, i) => x - current_delta * this.direction[i])) > this.objective(this.x) - this.beta * current_delta * this.direction.map((x,i) => x * this.gradient[i]).reduce((a,b) => a + b, 0)) {
+      current_delta = this.tau * current_delta;
+    }
+    this.x = this.x.map((x, i) => x - current_delta * this.direction[i])
+    return norm
+  }
+
   optimize(){
     let norm = 0;
     let steps = 0;
+    if (this.flag_barmijo){
+      do {
+        this.path.push(this.x.map(x => x));
+        norm = (this.one_step_armijo())**(1/2);
+        steps = steps + 1;
+      } while (norm > this.params[paramNames.normLim] && steps < this.params[paramNames.nlim]);
+      return this.path;
+    }
     do {
       this.path.push(this.x.map(x => x));
       norm = (this.one_step())**(1/2);
@@ -113,71 +145,58 @@ class AlgorithmSecondOrder extends AlgorithmFirstOrder{
 }
 
 /** Simple Gradient Descent algorithm must do the following task
-* @method one_step : One step towards the opposite of the gradient
+* @method compute_direction : Compute the descent direction
 */
 class GradientDescent extends AlgorithmFirstOrder{
   constructor(params) {
     super(algorithmNames.gradientDescent, params);
   }
 
-  one_step() {
-    const gradient = this.differentiate(this.x);
-    let norm = 0;
-    for (let i = 0, len = gradient.length; i < len; i++) {
-      this.x[i] = this.x[i] - this.delta * gradient[i];
-      norm = norm + gradient[i] ** 2
-    }
-    return norm
+  compute_direction() {
+    this.gradient = this.differentiate(this.x);
+    this.direction = this.gradient.map(x => x);
+    return this.gradient.reduce((a,b) => a + b**2, 0);
   }
 }
 
 /** Gradient Descent with momentum must do the following task
-* @method one_step : One step towards the opposite of the gradient with momentum.
+* @method compute_direction : Compute the opposite direction for momentum.
 */
 class GradientDescentMomentum extends AlgorithmFirstOrder{
   constructor(params) {
     super(algorithmNames.gradientDescentWithMomentum, params);
     this.momentum = params[paramNames.momentum];
-    this.currentgrad = this.x_ini.map(() => 0);
+    this.direction = this.x_ini.map(() => 0);
   }
 
-  one_step() {
-    const gradient = this.differentiate(this.x);
-    this.currentgrad = this.currentgrad.map((e,i) => this.momentum * e + this.delta * gradient[i])
-    let norm = 0;
-    for (let i = 0, len = gradient.length; i < len; i++) {
-      this.x[i] = this.x[i] - this.currentgrad[i];
-      norm = norm + gradient[i] ** 2
-    }
-    return norm
+  compute_direction() {
+    this.gradient = this.differentiate(this.x);
+    this.direction = this.direction.map((e,i) => this.momentum * e + this.gradient[i])
+    return this.gradient.reduce((a,b) => a + b**2, 0);
   }
 }
 
 /** Gradient Descent with nesterov momentum must do the following task
-* @method one_step : One step towards the opposite of the gradient with nesterov momentum.
+* @method compute_direction : Compute the descent direction.
 */
 class GradientDescentMomentumNesterov extends AlgorithmFirstOrder{
   constructor(params) {
     super(algorithmNames.gradientDescentMomentumNesterov, params);
     this.momentum = params[paramNames.momentum];
-    this.currentgrad = this.x_ini.map(() => 0);
+    this.direction = this.x_ini.map(() => 0);
   }
 
-  one_step() {
-    let x_next = this.x.map((e,i) => e - this.momentum * this.currentgrad[i]);
-    const gradient = this.differentiate(x_next);
-    this.currentgrad = this.currentgrad.map((e,i) => this.momentum * e + this.delta * gradient[i]);
-    let norm = 0;
-    for (let i = 0, len = gradient.length; i < len; i++) {
-      this.x[i] = this.x[i] - this.currentgrad[i];
-      norm = norm + gradient[i] ** 2
-    }
-    return norm
+  compute_direction() {
+    let x_next = this.x.map((e,i) => e - this.momentum * this.delta * this.direction[i]);
+    this.gradient = this.differentiate(x_next);
+    this.direction = this.direction.map((e,i) => this.momentum * e + this.gradient[i]);
+    this.gradient = this.differentiate(this.x);
+    return this.gradient.reduce((a,b) => a + b**2, 0);
   }
 }
 
-/** Gradient Descent with nesterov momentum must do the following task
-* @method one_step : One step towards the opposite of the gradient with nesterov momentum.
+/** RMSProp must do the following task
+* @method compute_direction : Compute the descent direction
 */
 class RMSProp extends AlgorithmFirstOrder{
   constructor(params) {
@@ -187,21 +206,16 @@ class RMSProp extends AlgorithmFirstOrder{
     this.currentSquareGradientAverage = this.x_ini.map(() => 0);
   }
 
-  one_step() {
-    let gradient = this.differentiate(this.x);
-    this.currentSquareGradientAverage = this.currentSquareGradientAverage.map((e,i) => this.rho * e + (1-this.rho) * (gradient[i] ** 2));
-    let direction = gradient.map((e,i) => (this.delta * e) / (Math.sqrt(this.currentSquareGradientAverage[i]) + this.epsilon));
-    let norm = 0;
-    for (let i = 0, len = gradient.length; i < len; i++) {
-      this.x[i] = this.x[i] - direction[i];
-      norm = norm + gradient[i] ** 2
-    }
-    return norm
+  compute_direction() {
+    this.gradient = this.differentiate(this.x);
+    this.currentSquareGradientAverage = this.currentSquareGradientAverage.map((e,i) => this.rho * e + (1-this.rho) * (this.gradient[i] ** 2));
+    this.direction = this.gradient.map((e,i) => e / (Math.sqrt(this.currentSquareGradientAverage[i]) + this.epsilon));
+    return this.gradient.reduce((a,b) => a + b**2, 0);
   }
 }
 
-/** Gradient Descent with nesterov momentum must do the following task
-* @method one_step : One step towards the opposite of the gradient with nesterov momentum.
+/** Adam must do the following task
+* @method compute_direction : Compute the descent direction
 */
 class Adam extends AlgorithmFirstOrder{
   constructor(params) {
@@ -214,29 +228,24 @@ class Adam extends AlgorithmFirstOrder{
     this.nStep = 0;
   }
 
-  one_step() {
+  compute_direction() {
     this.nStep = this.nStep + 1;
-    let gradient = this.differentiate(this.x);
-    this.currentGradientAverage = this.currentGradientAverage.map((e,i) => this.beta1 * e + (1 - this.beta1) * gradient[i]);
-    this.currentSquareGradientAverage = this.currentSquareGradientAverage.map((e,i) => this.beta2 * e + (1-this.beta2) * (gradient[i] ** 2));
-
+    this.gradient = this.differentiate(this.x);
+    this.currentGradientAverage = this.currentGradientAverage.map((e,i) => this.beta1 * e + (1 - this.beta1) * this.gradient[i]);
+    this.currentSquareGradientAverage = this.currentSquareGradientAverage.map((e,i) => this.beta2 * e + (1-this.beta2) * (this.gradient[i] ** 2));
     let firstCorrectionTerm = 1 - (this.beta1 ** this.nStep);
     let secondCorrectionTerm = 1 - (this.beta2 ** this.nStep);
     let currentFirstMoment = this.currentGradientAverage.map(e => e/firstCorrectionTerm);
     let currentSecondMoment = this.currentSquareGradientAverage.map(e => e/secondCorrectionTerm);
-
-    let direction = this.currentGradientAverage.map((e,i) => (this.delta * e) / (Math.sqrt(this.currentSquareGradientAverage[i]) + this.epsilon));
-    let norm = 0;
-    for (let i = 0, len = gradient.length; i < len; i++) {
-      this.x[i] = this.x[i] - direction[i];
-      norm = norm + gradient[i] ** 2
-    }
-    return norm
+    this.direction = this.currentGradientAverage.map((e,i) => e / (Math.sqrt(this.currentSquareGradientAverage[i]) + this.epsilon));
+    return this.gradient.reduce((a,b) => a + b**2, 0);
   }
 }
 
 /** BFGS implements the following interface
-* @method one_step : One step towards the bfgs direction.
+* @method direction : Compute the descent direction.
+* @method one_step : Modify one step to make updates.
+* @method update : Method for BFGS update.
 */
 class BFGS extends AlgorithmFirstOrder{
   constructor(params) {
@@ -244,40 +253,64 @@ class BFGS extends AlgorithmFirstOrder{
     this.x_ini = array2vec(this.x_ini);
     this.x = array2vec(this.x);
     this.n = this.x_ini.length
-    this.currentGradient = this.differentiate(this.x);
+    this.gradient = this.differentiate(this.x);
     this.currentHessian = eye(this.n);
   }
 
-  one_step() {
-    if (this.n === 1) {
-      let direction = -1 * this.delta * this.currentGradient / this.currentHessian;
-      this.x[0] = this.x[0] + direction;
-      let next_gradient = this.differentiate(this.x);
-      let y_k = next_gradient.map((el, i)=> el - this.currentGradient[i]);
-      let firstQuantity = direction * y_k;
-      let secondQuantity = this.currentHessian * direction;
-      let thirdQuantity = direction * secondQuantity;
-      this.currentHessian = this.currentHessian + ((y_k * y_k) / firstQuantity) - secondQuantity * (secondQuantity / thirdQuantity);
-      let normGrad = this.currentGradient ** 2;
-      this.currentGradient = next_gradient.map(el => el);
-      return normGrad
+  compute_direction() {
+    if (this.n == 1) {
+      this.direction = [this.gradient / this.currentHessian];
+      return this.gradient.reduce((a,b) => a + b**2, 0);
     }
-    let direction = solve(this.currentHessian, this.currentGradient.map(el => -1 * this.delta * el ));
-    this.x = add(this.x, direction);
-    let next_gradient = this.differentiate(this.x);
-    let y_k = sub(next_gradient, this.currentGradient);
-    let firstQuantity = mul(direction, y_k);
-    let secondQuantity = mul(this.currentHessian, direction);
-    let thirdQuantity = mul(direction, secondQuantity);
-    this.currentHessian = add(this.currentHessian, sub(mul(y_k, transpose(y_k.map(el => el/firstQuantity))), mul(secondQuantity, transpose(secondQuantity.map(el => el / thirdQuantity)))));
-    let normGrad = norm(this.currentGradient);
-    this.currentGradient = next_gradient.map(el => el);
-    return normGrad
+    this.direction = solve(this.currentHessian, this.gradient);
+    return this.gradient.reduce((a,b) => a + b**2, 0);
+  }
+
+  one_step() {
+    let norm = this.compute_direction();
+    this.x_next = this.x.map((x, i) => x - this.delta * this.direction[i])
+    this.update();
+    return norm
+  }
+
+  one_step_armijo() {
+    let norm = this.compute_direction();
+    let current_delta = this.delta;
+    while (this.objective(this.x.map((x, i) => x - current_delta * this.direction[i])) > this.objective(this.x) - this.beta * current_delta * this.direction.map((x,i) => x * this.gradient[i]).reduce((a,b) => a + b, 0)) {
+      current_delta = this.tau * current_delta;
+    }
+    this.x_next = this.x.map((x, i) => x - current_delta * this.direction[i])
+    this.update();
+    return norm
+  }
+
+  update() {
+    if (this.n === 1){
+      let vector_s = this.x_next[0] - this.x[0];
+      let next_gradient = this.differentiate(this.x_next);
+      let y_k = next_gradient.map((el, i)=> el - this.gradient[i]);
+      let firstQuantity = vector_s * y_k;
+      let secondQuantity = this.currentHessian * vector_s;
+      let thirdQuantity = vector_s * secondQuantity;
+      this.currentHessian = this.currentHessian + ((y_k * y_k) / firstQuantity) - secondQuantity * (secondQuantity / thirdQuantity);
+      this.x = this.x_next.map(x => x);
+      this.gradient = next_gradient.map(el => el);
+    } else {
+      let next_gradient = this.differentiate(this.x_next);
+      let vector_s = array2vec(this.x_next.map((e,i) => e - this.x[i]))
+      let y_k = sub(next_gradient, this.gradient);
+      let firstQuantity = mul(vector_s, y_k);
+      let secondQuantity = mul(this.currentHessian, vector_s);
+      let thirdQuantity = mul(vector_s, secondQuantity);
+      this.currentHessian = add(this.currentHessian, sub(mul(y_k, transpose(y_k.map(el => el/firstQuantity))), mul(secondQuantity, transpose(secondQuantity.map(el => el / thirdQuantity)))));
+      this.x = this.x_next.map(x => x);
+      this.gradient = next_gradient.map(x => x);
+    }
   }
 }
 
 /** Newton Descent
-* @method one_step : Perform Newton Step.
+* @method direction : Compute the descent direction.
 */
 class DampedNewton extends AlgorithmSecondOrder{
   constructor(params) {
@@ -287,24 +320,23 @@ class DampedNewton extends AlgorithmSecondOrder{
     this.x = array2vec(this.x);
     this.n = this.x_ini.length;
   }
-  one_step() {
+
+  compute_direction() {
     if (this.n === 1) {
       let hess = this.hessian(this.x);
       let eigval = Math.max(Math.abs(hess[0]),  this.epsilon);
-      let gradient = this.differentiate(this.x);
-      let direction = -1 * gradient / eigval ;
-      this.x[0] = this.x[0] + this.delta * direction;
-      return gradient ** 2;
+      this.gradient = this.differentiate(this.x);
+      this.direction = [this.gradient / eigval] ;
+      return this.gradient.reduce((a,b) => a + b**2, 0);
     }
     let hess = array2mat(this.hessian(this.x));
-    let eigdec = eigs(hess, this.x_ini.length);
+    let eigdec = eigs(hess, this.n);
     let eigval = eigdec.V;
     let eigvec = eigdec.U;
     eigval = eigval.map(el => Math.max(Math.abs(el), this.epsilon));
     hess = mul(eigvec, mul(diag(eigval), transpose(eigvec)));
-    let gradient = this.differentiate(this.x);
-    let direction = solve(hess, mul(-1, gradient));
-    this.x = add(this.x, direction.map(el => el * this.delta));
-    return norm(gradient);
+    this.gradient = this.differentiate(this.x);
+    this.direction = solve(hess, this.gradient);
+    return this.gradient.reduce((a,b) => a + b**2, 0);
   }
 }
