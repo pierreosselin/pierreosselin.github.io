@@ -125,9 +125,9 @@
 <div id="algoParamsButtonSpace" class="buttonGroup"></div>
 
 <svg id="svg1" class="svg-content-responsive" style="margin: 0 auto; display: block;"></svg>
-
 <div id="documentationFunction" align="center"></div>
 <div id="documentationAlgo" align="center"></div>
+<div id="documentationBacktracking" align="center"></div>
 <script src="http://localhost:4000/assets/js/gradient_descent.js"></script>
 <script src="http://localhost:4000/assets/js/config.js"></script>
 <script src="http://localhost:4000/assets/js/ParameterInput.js"></script>
@@ -135,6 +135,7 @@
 <script src="http://localhost:4000/assets/js/ApplicationManager.js"></script>
 <script src="http://localhost:4000/assets/js/contour_plot.js"></script>
 <script>
+  setDoc("http://localhost:4000");
   const initialObjective = paramsConfig[paramNames.objectiveFunction].values[plotTypes.contour_plot].get_init_value().name;
   const xDomain = paramsConfig[paramNames.xDomain].values[plotTypes.contour_plot].get_init_value(null, initialObjective);
   const yDomain = paramsConfig[paramNames.yDomain].values[plotTypes.contour_plot].get_init_value(null, initialObjective);
