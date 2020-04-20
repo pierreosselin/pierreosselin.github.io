@@ -581,3 +581,15 @@ const docConfigBacktracking = {
   given that \\(p_{k}\\) is the descent direction and \\(g_{k}\\) the gradient at \\(x_{k}\\). This procedure terminates (if the direction is a descent direction, check taylor in first order), and ensures the step taken decreases the objective function",
   link : "files/Algorithm.PNG"
 }
+
+function setDoc(id) {
+  docConfigAlgorithms[algorithmNames.gradientDescent].link = id + "/imgs/GradientDescent.PNG";
+  docConfigAlgorithms[algorithmNames.gradientDescentWithMomentum].link = id + "/imgs/Momentum.PNG";
+  docConfigAlgorithms[algorithmNames.gradientDescentMomentumNesterov].link = id + "/imgs/Nesterov.PNG";
+  docConfigAlgorithms[algorithmNames.RMSProp].link = id + "/imgs/RMSProp.PNG";
+  docConfigAlgorithms[algorithmNames.adam].link = id + "/imgs/Adam.PNG";
+  docConfigAlgorithms[algorithmNames.bfgs].link = id + "/imgs/BFGS.PNG";
+  docConfigAlgorithms[algorithmNames.newton].link = id + "/imgs/Newton.PNG";
+  docConfigBacktracking.link = id + "/imgs/Algorithm.PNG";
+
+}

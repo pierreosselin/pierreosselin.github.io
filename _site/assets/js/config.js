@@ -509,7 +509,7 @@ const docConfigAlgorithms = {
   Where \\( \\alpha \\) is called the learning rate. At every iteration, this algorithm takes a step towards the direction of the steepest descent of the function, given by the opposite of its gradient. \
   Although it is the simplest first-order method, it is guaranteed to converge to a local minimum if the objective function is bounded below, has a Lipschitz continuous gradient, and if the step is chosen \
   according to some criterion such as the bArmijo linesearch (not implemented for the moment).",
-  link : "http://localhost:4000/imgs/GradientDescent.PNG",
+  link : "files/GradientDescent.PNG",
   explain : "The algorithm only follows the steepest descent. As a result, it is vulnerable to scale inhomogeneity. In the figure, we can see that the algorithms oscilates in valleys."
   },
   [algorithmNames.gradientDescentWithMomentum]: {name : "Gradient Descent Algorithm with Momentum", value :
@@ -582,13 +582,14 @@ const docConfigBacktracking = {
   link : "files/Algorithm.PNG"
 }
 
-function setDoc(idFile) {
-  docConfigAlgorithms[algorithmNames.gradientDescent].link = idFile + "/imgs/GradientDescent.PNG";
-  docConfigAlgorithms[algorithmNames.gradientDescentWithMomentum].link = idFile + "/imgs/Momentum.PNG";
-  docConfigAlgorithms[algorithmNames.gradientDescentMomentumNesterov].link = idFile + "/imgs/Nesterov.PNG";
-  docConfigAlgorithms[algorithmNames.RMSProp].link = idFile + "/imgs/RMSProp.PNG";
-  docConfigAlgorithms[algorithmNames.adam].link = idFile + "/imgs/Adam.PNG";
-  docConfigAlgorithms[algorithmNames.bfgs].link = idFile + "/imgs/BFGS.PNG";
-  docConfigAlgorithms[algorithmNames.newton].link = idFile + "/imgs/Newton.PNG";
-  docConfigBacktracking.link = idFile + "/imgs/Algorithm.PNG"
+function setDoc(id) {
+  docConfigAlgorithms[algorithmNames.gradientDescent].link = id + "/imgs/GradientDescent.PNG";
+  docConfigAlgorithms[algorithmNames.gradientDescentWithMomentum].link = id + "/imgs/Momentum.PNG";
+  docConfigAlgorithms[algorithmNames.gradientDescentMomentumNesterov].link = id + "/imgs/Nesterov.PNG";
+  docConfigAlgorithms[algorithmNames.RMSProp].link = id + "/imgs/RMSProp.PNG";
+  docConfigAlgorithms[algorithmNames.adam].link = id + "/imgs/Adam.PNG";
+  docConfigAlgorithms[algorithmNames.bfgs].link = id + "/imgs/BFGS.PNG";
+  docConfigAlgorithms[algorithmNames.newton].link = id + "/imgs/Newton.PNG";
+  docConfigBacktracking.link = id + "/imgs/Algorithm.PNG";
+
 }
