@@ -508,7 +508,7 @@ const docConfigAlgorithms = {
   $$x_{k + 1} = x_{k} - \\alpha \\nabla_{x} f(x_{k})$$ \
   Where \\( \\alpha \\) is called the learning rate. At every iteration, this algorithm takes a step towards the direction of the steepest descent of the function, given by the opposite of its gradient. \
   Although it is the simplest first-order method, it is guaranteed to converge to a local minimum if the objective function is bounded below, has a Lipschitz continuous gradient, and if the step is chosen \
-  according to some criterion such as the bArmijo linesearch (not implemented for the moment).",
+  according to some criterion such as the bArmijo linesearch.",
   link : "files/GradientDescent.PNG",
   explain : "The algorithm only follows the steepest descent. As a result, it is vulnerable to scale inhomogeneity. In the figure, we can see that the algorithms oscilates in valleys."
   },
